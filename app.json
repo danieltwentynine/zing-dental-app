@@ -25,6 +25,13 @@
     "plugins": [
       "expo-router",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d9d41921-b061-4b1d-9bc8-813ad94f21ed"
+      }
+    },
+    "owner": "zing-dental-ai"
   }
 }
