@@ -9,5 +9,5 @@ export default function Index() {
     return null;
   }
 
-  return <Redirect href={user ? '/onboarding/child-setup' : '/(auth)/register'} />;
+  return <Redirect href={user ? '/(tabs)/home' : '/onboarding/welcome'} />;
 }

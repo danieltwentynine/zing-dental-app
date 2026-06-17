@@ -1,25 +1,27 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { FirebaseError } from 'firebase/app';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { ArrowLeft, EnvelopeSimple, LockSimple, User } from 'phosphor-react-native';
 import { useState } from 'react';
 import { Controller, useForm, type Control, type FieldPath } from 'react-hook-form';
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
-  type TextInputProps,
+  type KeyboardTypeOptions,
 } from 'react-native';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { SafeScreen } from '@/components/ui/SafeScreen';
-import { COLORS } from '@/lib/constants';
 import { auth, db } from '@/lib/firebase';
+import { tokens } from '@/lib/tokens';
 
 const registerSchema = z
   .object({
@@ -51,36 +53,33 @@ function registrationErrorMessage(error: unknown): string {
   return "We couldn't create your account right now. Please try again.";
 }
 
-interface FormFieldProps extends Pick<TextInputProps, 'autoCapitalize' | 'keyboardType' | 'secureTextEntry'> {
+interface FormFieldProps {
   control: Control<RegisterFormValues>;
   name: FieldPath<RegisterFormValues>;
   label: string;
   placeholder: string;
+  icon?: React.ReactNode;
+  secureTextEntry?: boolean;
+  autoCapitalize?: 'none' | 'words';
+  keyboardType?: KeyboardTypeOptions;
 }
 
-function FormField({ control, name, label, placeholder, ...inputProps }: FormFieldProps) {
+function FormField({ control, name, label, placeholder, icon, ...inputProps }: FormFieldProps) {
   return (
     <Controller
       control={control}
       name={name}
       render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-        <View className="mb-4">
-          <Text className="mb-1.5 font-bodySemibold text-sm text-ink">{label}</Text>
-          <TextInput
-            className={`h-14 rounded-2xl border bg-surface px-4 font-body text-base text-ink ${
-              error ? 'border-danger' : 'border-slate-200'
-            }`}
-            placeholder={placeholder}
-            placeholderTextColor={COLORS.textSecondary}
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            {...inputProps}
-          />
-          {error ? (
-            <Text className="mt-1 font-body text-sm text-danger">{error.message}</Text>
-          ) : null}
-        </View>
+        <Input
+          label={label}
+          placeholder={placeholder}
+          icon={icon}
+          value={value}
+          onChangeText={onChange}
+          onBlur={onBlur}
+          error={error?.message}
+          {...inputProps}
+        />
       )}
     />
   );
@@ -111,68 +110,79 @@ export default function RegisterScreen() {
 
   return (
     <SafeScreen>
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
-          contentContainerClassName="flex-grow justify-center px-6 py-8"
+          contentContainerClassName="flex-grow px-6 pb-7 pt-1"
           keyboardShouldPersistTaps="handled"
         >
-          <View className="mb-8">
-            <Text className="font-display text-3xl text-ink">Welcome to Zing</Text>
-            <Text className="mt-2 font-body text-base text-muted">
-              Create your parent account to start your child's brushing adventure.
-            </Text>
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={8}
+            style={{ alignSelf: 'flex-start', padding: 4, marginBottom: 6 }}
+          >
+            <ArrowLeft size={26} color={tokens.textSecondary} weight="bold" />
+          </Pressable>
+
+          <Text className="font-display text-3xl text-ink">Welcome to Zing</Text>
+          <Text className="mb-6 mt-1.5 font-body text-base text-muted">
+            Create your parent account to start your child's brushing adventure.
+          </Text>
+
+          <View style={{ rowGap: 16 }}>
+            <FormField
+              control={control}
+              name="displayName"
+              label="Your name"
+              placeholder="e.g. Maria"
+              autoCapitalize="words"
+              icon={<User size={20} color={tokens.textTertiary} weight="bold" />}
+            />
+            <FormField
+              control={control}
+              name="email"
+              label="Email"
+              placeholder="you@example.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              icon={<EnvelopeSimple size={20} color={tokens.textTertiary} weight="bold" />}
+            />
+            <FormField
+              control={control}
+              name="password"
+              label="Password"
+              placeholder="At least 8 characters"
+              autoCapitalize="none"
+              secureTextEntry
+              icon={<LockSimple size={20} color={tokens.textTertiary} weight="bold" />}
+            />
+            <FormField
+              control={control}
+              name="confirmPassword"
+              label="Confirm password"
+              placeholder="Type it again"
+              autoCapitalize="none"
+              secureTextEntry
+              icon={<LockSimple size={20} color={tokens.textTertiary} weight="bold" />}
+            />
           </View>
 
-          <FormField
-            control={control}
-            name="displayName"
-            label="Your name"
-            placeholder="e.g. Maria"
-            autoCapitalize="words"
-          />
-          <FormField
-            control={control}
-            name="email"
-            label="Email"
-            placeholder="you@example.com"
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-          <FormField
-            control={control}
-            name="password"
-            label="Password"
-            placeholder="At least 8 characters"
-            autoCapitalize="none"
-            secureTextEntry
-          />
-          <FormField
-            control={control}
-            name="confirmPassword"
-            label="Confirm password"
-            placeholder="Type it again"
-            autoCapitalize="none"
-            secureTextEntry
-          />
-
           {submitError ? (
-            <Text className="mb-4 font-bodySemibold text-sm text-danger">{submitError}</Text>
+            <Text className="mt-4 font-bodySemibold text-sm text-danger">{submitError}</Text>
           ) : null}
 
           <Button
             label="Create account"
+            size="lg"
             onPress={handleSubmit(onSubmit)}
             loading={formState.isSubmitting}
+            style={{ marginTop: 20 }}
           />
 
-          <View className="mt-6 flex-row justify-center">
+          <View className="mt-4 flex-row justify-center">
             <Text className="font-body text-muted">Already have an account? </Text>
-            <Link href="/(auth)/login" className="font-bodySemibold text-primary">
-              Log in
-            </Link>
+            <Pressable onPress={() => router.replace('/(auth)/login')}>
+              <Text className="font-display text-mint-600">Log in</Text>
+            </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
