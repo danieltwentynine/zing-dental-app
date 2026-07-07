@@ -2,12 +2,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Sparkle, X } from 'phosphor-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrushTimer } from '@/components/brushing/BrushTimer';
-import { MouthMap, MOUTH_ZONES, type ZoneState } from '@/components/brushing/MouthMap';
+import { MouthMap, type ZoneState } from '@/components/brushing/MouthMap';
 import { buildCoachMessage } from '@/lib/coach';
 import { BRUSHING_DURATION_SECONDS, COUNTDOWN_SECONDS } from '@/lib/constants';
 import { saveSession } from '@/lib/sessions';
@@ -45,11 +45,25 @@ export default function SessionScreen() {
   const [phase, setPhase] = useState<'countdown' | 'active'>('countdown');
   const [count, setCount] = useState(COUNTDOWN_SECONDS);
   const [remaining, setRemaining] = useState(BRUSHING_DURATION_SECONDS);
-  const [states, setStates] = useState<Partial<Record<ToothZone, ZoneState>>>({});
-  const stepRef = useRef(0);
   const remainingRef = useRef(BRUSHING_DURATION_SECONDS);
   const finishedRef = useRef(false);
   const childName = child?.name ?? 'friend';
+
+  // Zone progress is derived from the clock: one source of truth, no drift.
+  const elapsed = BRUSHING_DURATION_SECONDS - remaining;
+  const zonesReached = Math.min(
+    GUIDE_ORDER.length,
+    Math.floor((elapsed / BRUSHING_DURATION_SECONDS) * GUIDE_ORDER.length),
+  );
+
+  const zoneStates = useMemo(() => {
+    const ns: Partial<Record<ToothZone, ZoneState>> = {};
+    GUIDE_ORDER.forEach((z, i) => {
+      if (i < zonesReached) ns[z] = 'done';
+      else if (i === zonesReached) ns[z] = 'active';
+    });
+    return ns;
+  }, [zonesReached]);
 
   // Countdown 3 → 2 → 1 → Go!
   useEffect(() => {
@@ -62,42 +76,17 @@ export default function SessionScreen() {
     return () => clearTimeout(t);
   }, [phase, count]);
 
-  // Active session — a 2-minute guided walk through every zone.
-  useEffect(() => {
-    if (phase !== 'active') return;
-    const total = BRUSHING_DURATION_SECONDS;
-    const interval = setInterval(() => {
-      setRemaining((r) => {
-        const next = r - 1;
-        remainingRef.current = next;
-        const elapsed = total - next;
-        const idx = Math.floor((elapsed / total) * GUIDE_ORDER.length);
-        if (idx !== stepRef.current) {
-          stepRef.current = idx;
-          setStates(() => {
-            const ns: Partial<Record<ToothZone, ZoneState>> = {};
-            for (let i = 0; i < idx; i++) ns[GUIDE_ORDER[i]] = 'done';
-            if (idx < GUIDE_ORDER.length) ns[GUIDE_ORDER[idx]] = 'active';
-            return ns;
-          });
-        }
-        if (next <= 0) {
-          clearInterval(interval);
-          finish();
-          return 0;
-        }
-        return next;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
-
-  const finish = () => {
+  const finish = useCallback(() => {
     if (finishedRef.current) return;
     finishedRef.current = true;
 
-    const reached = Math.min(stepRef.current, GUIDE_ORDER.length);
+    const total = BRUSHING_DURATION_SECONDS;
+    const elapsedAtFinish = Math.min(total, Math.max(0, total - remainingRef.current));
+    const reached = Math.min(
+      GUIDE_ORDER.length,
+      Math.floor((elapsedAtFinish / total) * GUIDE_ORDER.length),
+    );
+
     const final: Partial<Record<ToothZone, ZoneState>> = {};
     const missed: ToothZone[] = [];
     GUIDE_ORDER.forEach((z, i) => {
@@ -109,12 +98,10 @@ export default function SessionScreen() {
       }
     });
 
-    const done = reached;
-    const score = Math.round((done / MOUTH_ZONES.length) * 100);
-    const elapsed = BRUSHING_DURATION_SECONDS - remainingRef.current;
-    const coachMessage = buildCoachMessage(childName, missed, score);
+    const score = Math.round((reached / GUIDE_ORDER.length) * 100);
+    const coachMessage = buildCoachMessage(child?.name ?? 'friend', missed, score);
     const coverage: Record<string, number> = {};
-    MOUTH_ZONES.forEach((z) => {
+    GUIDE_ORDER.forEach((z) => {
       coverage[z] = final[z] === 'done' ? 100 : 0;
     });
 
@@ -122,7 +109,7 @@ export default function SessionScreen() {
       score,
       zoneStates: final,
       missed,
-      durationSeconds: Math.max(0, elapsed),
+      durationSeconds: elapsedAtFinish,
       coachMessage,
     });
 
@@ -130,8 +117,8 @@ export default function SessionScreen() {
       void saveSession({
         childId: child.id,
         parentUid: user.uid,
-        durationSeconds: Math.max(0, elapsed),
-        zonesDetected: GUIDE_ORDER.slice(0, done),
+        durationSeconds: elapsedAtFinish,
+        zonesDetected: GUIDE_ORDER.slice(0, reached),
         zonesCoverage: coverage,
         score,
         coachMessage,
@@ -140,9 +127,25 @@ export default function SessionScreen() {
     }
 
     setTimeout(() => router.replace('/results'), 350);
-  };
+  }, [child, user, setLastResult]);
 
-  const currentZone = GUIDE_ORDER[Math.min(stepRef.current, GUIDE_ORDER.length - 1)];
+  // Active session — a 2-minute guided walk through every zone. Side effects
+  // live in the interval callback so the state updaters stay pure.
+  useEffect(() => {
+    if (phase !== 'active') return;
+    const interval = setInterval(() => {
+      const next = remainingRef.current - 1;
+      remainingRef.current = next;
+      setRemaining(Math.max(0, next));
+      if (next <= 0) {
+        clearInterval(interval);
+        finish();
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [phase, finish]);
+
+  const currentZone = GUIDE_ORDER[Math.min(zonesReached, GUIDE_ORDER.length - 1)];
 
   return (
     <LinearGradient colors={['#0b3b3a', '#051c20']} style={{ flex: 1 }}>
@@ -199,7 +202,7 @@ export default function SessionScreen() {
             </View>
 
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <MouthMap states={states} size={260} />
+              <MouthMap states={zoneStates} size={260} />
             </View>
 
             <Text

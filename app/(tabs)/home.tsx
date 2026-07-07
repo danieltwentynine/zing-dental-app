@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { CheckCircle, Gear, Moon, Play, Sun } from 'phosphor-react-native';
+import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,6 +9,7 @@ import { Avatar } from '@/components/kids/Avatar';
 import { StreakDisplay } from '@/components/kids/StreakDisplay';
 import { Card } from '@/components/ui/Card';
 import { useActiveChild } from '@/hooks/useActiveChild';
+import { fetchRecentSessions, type RecentSession } from '@/lib/sessions';
 import { palette, radius, shadows, tokens } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -17,6 +19,25 @@ function SectionTitle({ children }: { children: string }) {
       {children}
     </Text>
   );
+}
+
+function isToday(date: Date): boolean {
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+}
+
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+}
+
+function greetingForHour(hour: number): string {
+  if (hour < 12) return 'Good morning,';
+  if (hour < 18) return 'Good afternoon,';
+  return 'Good evening,';
 }
 
 interface Slot {
@@ -29,11 +50,41 @@ interface Slot {
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
   const { child } = useActiveChild();
+  const [todaySessions, setTodaySessions] = useState<RecentSession[]>([]);
+
+  // Re-fetch on focus so a just-finished session shows up when the
+  // child comes back to this tab (tab screens stay mounted).
+  useFocusEffect(
+    useCallback(() => {
+      if (!child) return;
+      let cancelled = false;
+      fetchRecentSessions(child.parentUid, child.id, 10).then((sessions) => {
+        if (!cancelled) setTodaySessions(sessions.filter((s) => isToday(s.completedAt)));
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [child]),
+  );
 
   const parentName = user?.displayName?.split(' ')[0] ?? 'there';
+  const hour = new Date().getHours();
+  const morning = todaySessions.find((s) => s.completedAt.getHours() < 12);
+  const evening = todaySessions.find((s) => s.completedAt.getHours() >= 12);
+  const nextSlot = !morning && hour < 12 ? 'morning' : 'evening';
   const slots: Slot[] = [
-    { label: 'Morning', done: true, time: '7:52 AM', Icon: Sun },
-    { label: 'Evening', done: false, time: 'Not yet', Icon: Moon },
+    {
+      label: 'Morning',
+      done: Boolean(morning),
+      time: morning ? formatTime(morning.completedAt) : 'Not yet',
+      Icon: Sun,
+    },
+    {
+      label: 'Evening',
+      done: Boolean(evening),
+      time: evening ? formatTime(evening.completedAt) : 'Not yet',
+      Icon: Moon,
+    },
   ];
 
   return (
@@ -43,7 +94,7 @@ export default function HomeScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View>
             <Text className="font-bodySemibold" style={{ fontSize: 14, color: tokens.textSecondary }}>
-              Good morning,
+              {greetingForHour(hour)}
             </Text>
             <Text className="font-display" style={{ fontSize: 26, color: tokens.textPrimary }}>
               {parentName}
@@ -135,7 +186,7 @@ export default function HomeScreen() {
                 className="font-bodySemibold"
                 style={{ fontSize: 14, color: 'rgba(255,255,255,0.9)', marginTop: 2 }}
               >
-                Sparky is ready for your evening session.
+                Sparky is ready for your {nextSlot} session.
               </Text>
             </View>
             <Card

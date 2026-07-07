@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CoachCard } from '@/components/brushing/CoachCard';
 import { MouthMap } from '@/components/brushing/MouthMap';
 import { Button } from '@/components/ui/Button';
-import { radius, tokens } from '@/lib/tokens';
+import { tokens } from '@/lib/tokens';
 import { useSessionStore } from '@/stores/sessionStore';
 
 function LegendDot({ color, label }: { color: string; label: string }) {

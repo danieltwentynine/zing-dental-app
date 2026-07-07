@@ -3,8 +3,6 @@ import {
   addDoc,
   collection,
   getDocs,
-  limit,
-  orderBy,
   query,
   serverTimestamp,
   where,
@@ -70,28 +68,33 @@ export async function createChild(parentUid: string, input: NewChildInput): Prom
   };
 }
 
-/** The parent's first (active) child, or null. Returns null on any error — never throws to the UI. */
+/**
+ * The parent's first (active) child, or null if they have none yet.
+ * Throws on query failure so callers can tell an outage apart from "no child"
+ * — mixing the two would send an existing parent back through child setup.
+ * Equality-only filter + client-side sort: needs no composite index and stays
+ * provably within the parentUid security rules.
+ */
 export async function fetchActiveChild(parentUid: string): Promise<ChildProfile | null> {
-  try {
-    const q = query(
-      collection(db, 'children'),
-      where('parentUid', '==', parentUid),
-      orderBy('createdAt', 'asc'),
-      limit(1),
-    );
-    const snap = await getDocs(q);
-    const docSnap = snap.docs[0];
-    if (!docSnap) return null;
+  const q = query(collection(db, 'children'), where('parentUid', '==', parentUid));
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
 
+  const children = snap.docs.flatMap((docSnap) => {
     const parsed = childDocSchema.safeParse(docSnap.data());
-    if (!parsed.success) return null;
-
-    return {
-      id: docSnap.id,
-      ...parsed.data,
-      createdAt: parsed.data.createdAt ?? new Date(),
-    };
-  } catch {
-    return null;
+    if (!parsed.success) return [];
+    return [
+      {
+        id: docSnap.id,
+        ...parsed.data,
+        createdAt: parsed.data.createdAt ?? new Date(),
+      },
+    ];
+  });
+  if (children.length === 0) {
+    throw new Error('Child documents exist but none passed validation');
   }
+
+  children.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  return children[0];
 }

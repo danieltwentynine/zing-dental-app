@@ -24,14 +24,20 @@ export function useActiveChild() {
     }
     setLoading(true);
     (async () => {
-      const child = await fetchActiveChild(user.uid);
-      if (cancelled) return;
-      if (child) {
-        setActiveChild(child);
-      } else {
-        router.replace('/onboarding/child-setup');
+      try {
+        const child = await fetchActiveChild(user.uid);
+        if (cancelled) return;
+        if (child) {
+          setActiveChild(child);
+        } else {
+          router.replace('/onboarding/child-setup');
+        }
+      } catch {
+        // Couldn't load (offline, rules, …) — stay put instead of sending the
+        // parent to child setup, which would create a duplicate profile.
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     })();
     return () => {
       cancelled = true;

@@ -96,12 +96,19 @@ export default function RegisterScreen() {
     setSubmitError(null);
     try {
       const credential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(credential.user, { displayName });
-      await setDoc(doc(db, 'users', credential.user.uid), {
-        email,
-        displayName,
-        createdAt: serverTimestamp(),
-      });
+      // The account exists and is signed in from here on — a failed profile
+      // write must not strand the user behind a "couldn't create account"
+      // error (retrying would then hit email-already-in-use).
+      try {
+        await updateProfile(credential.user, { displayName });
+        await setDoc(doc(db, 'users', credential.user.uid), {
+          email,
+          displayName,
+          createdAt: serverTimestamp(),
+        });
+      } catch {
+        // Best-effort: displayName/profile doc can be filled in later.
+      }
       router.replace('/onboarding/child-setup');
     } catch (error) {
       setSubmitError(registrationErrorMessage(error));
