@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Zing Firestore rules — COPPA-critical: all child/session data is scoped to the
+// authenticated parent via parentUid (CLAUDE.md > Privacy). Anything not matched
+// below is denied by default.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function ownsExisting() {
+      return isSignedIn() && resource.data.parentUid == request.auth.uid;
+    }
+
+    function ownsIncoming() {
+      return isSignedIn() && request.resource.data.parentUid == request.auth.uid;
+    }
+
+    match /users/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    match /children/{childId} {
+      allow read, delete: if ownsExisting();
+      allow create: if ownsIncoming();
+      // Both checks so an update can never reassign parentUid to another account.
+      allow update: if ownsExisting() && ownsIncoming();
+    }
+
+    match /sessions/{sessionId} {
+      allow read, delete: if ownsExisting();
+      allow create: if ownsIncoming();
+      allow update: if ownsExisting() && ownsIncoming();
+    }
+  }
+}

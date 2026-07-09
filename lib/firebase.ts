@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getApp, getApps, initializeApp } from 'firebase/app';
+import { FirebaseError, getApp, getApps, initializeApp } from 'firebase/app';
 import {
   getAuth,
   getReactNativePersistence,
@@ -19,14 +19,19 @@ const firebaseConfig = {
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// initializeAuth throws if called twice (e.g. on fast refresh) — fall back to the existing instance.
 let auth: Auth;
 try {
   auth = initializeAuth(app, {
     persistence: getReactNativePersistence(AsyncStorage),
   });
-} catch {
-  auth = getAuth(app);
+} catch (error) {
+  // Fast refresh re-runs this module; only "already initialized" may fall through
+  // to the existing instance — anything else (e.g. broken persistence) must surface.
+  if (error instanceof FirebaseError && error.code === 'auth/already-initialized') {
+    auth = getAuth(app);
+  } else {
+    throw error;
+  }
 }
 
 export { auth };
