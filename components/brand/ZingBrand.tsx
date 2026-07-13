@@ -30,33 +30,45 @@ function sized(viewW: number, viewH: number, props: BrandProps) {
   return { width: viewW, height: viewH };
 }
 
-/** The Zing tooth + spark glyph (mint). */
+/** The Zing tooth + spark glyph (mint), bolt optically centered. */
 export function ZingMark(props: BrandProps) {
   return (
     <Svg viewBox="0 0 120 120" fill="none" {...sized(120, 120, props)}>
       <Path
-        d="M60 14C36 14 22 29 22 53c0 24 6 43 17 58 5 7 16 6 19-3l4-13c1-3 5-3 6 0l4 13c3 9 14 10 19 3 11-15 17-34 17-58 0-24-14-39-38-39Z"
+        d="M55 9C31 9 17 24 17 48c0 24 6 43 17 58 5 7 16 6 19-3l4-13c1-3 5-3 6 0l4 13c3 9 14 10 19 3 11-15 17-34 17-58 0-24-14-39-38-39Z"
         fill="#00C9A7"
       />
-      <Path d="M65 32 47 62h11l-6 26 22-34H72l5-22Z" fill="#FFFFFF" />
+      <Path
+        d="M69.3 20.9 L48.3 54.9 H59.3 L53.3 78.9 L74.3 44.9 H63.3 Z"
+        fill="#FFFFFF"
+        stroke="#FFFFFF"
+        strokeWidth={6}
+        strokeLinejoin="round"
+      />
     </Svg>
   );
 }
 
-/** Mark + "Zing" wordmark in Nunito ExtraBold (dark). */
+/** Mark + "Zing" wordmark in Nunito ExtraBold (dark), lockup centered in its canvas. */
 export function ZingWordmark(props: BrandProps) {
   return (
     <Svg viewBox="0 0 300 100" fill="none" {...sized(300, 100, props)}>
-      <G transform="translate(6,18) scale(0.62)">
+      <G transform="translate(43.4,12.5) scale(0.62)">
         <Path
-          d="M60 14C36 14 22 29 22 53c0 24 6 43 17 58 5 7 16 6 19-3l4-13c1-3 5-3 6 0l4 13c3 9 14 10 19 3 11-15 17-34 17-58 0-24-14-39-38-39Z"
+          d="M55 9C31 9 17 24 17 48c0 24 6 43 17 58 5 7 16 6 19-3l4-13c1-3 5-3 6 0l4 13c3 9 14 10 19 3 11-15 17-34 17-58 0-24-14-39-38-39Z"
           fill="#00C9A7"
         />
-        <Path d="M65 32 47 62h11l-6 26 22-34H72l5-22Z" fill="#FFFFFF" />
+        <Path
+          d="M69.3 20.9 L48.3 54.9 H59.3 L53.3 78.9 L74.3 44.9 H63.3 Z"
+          fill="#FFFFFF"
+          stroke="#FFFFFF"
+          strokeWidth={6}
+          strokeLinejoin="round"
+        />
       </G>
       <SvgText
-        x={92}
-        y={68}
+        x={126.4}
+        y={65}
         fontFamily="Nunito_800ExtraBold"
         fontWeight="800"
         fontSize={60}
