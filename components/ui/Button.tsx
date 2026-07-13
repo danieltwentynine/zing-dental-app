@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, Text, type ViewStyle } from 'react-native';
 
-import { motion, radius, shadows, tokens } from '@/lib/tokens';
+import { motion, palette, radius, shadows, tokens } from '@/lib/tokens';
 
 type ButtonVariant = 'primary' | 'secondary' | 'soft' | 'ghost' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -28,8 +28,10 @@ const SIZES: Record<ButtonSize, { height: number; paddingHorizontal: number; fon
 const VARIANTS: Record<ButtonVariant, { bg: string; fg: string; shadow?: ViewStyle; border?: string }> = {
   primary: { bg: tokens.brandPrimary, fg: tokens.textOnBrand, shadow: shadows.mint },
   secondary: { bg: tokens.brandSecondary, fg: tokens.textOnBrand, shadow: shadows.sky },
-  soft: { bg: tokens.surfaceMint, fg: '#00876f' },
-  ghost: { bg: 'transparent', fg: tokens.brandPrimary },
+  soft: { bg: tokens.surfaceMint, fg: palette.mint[700] },
+  // mint-500 on the near-white page bg is ~2:1 contrast (looks invisible);
+  // mint-700 keeps the brand green while staying legible on light surfaces.
+  ghost: { bg: 'transparent', fg: palette.mint[700] },
   outline: { bg: tokens.surfaceCard, fg: tokens.textPrimary, border: tokens.borderSubtle },
 };
 
@@ -46,6 +48,10 @@ export function Button({
   style,
 }: ButtonProps) {
   const isDisabled = disabled || loading;
+  // Pressed state lives in React state because NativeWind's runtime drops
+  // Pressable's function-form style prop (nativewind/nativewind#1105) —
+  // style={({ pressed }) => ...} renders completely unstyled here.
+  const [pressed, setPressed] = useState(false);
   const s = SIZES[size];
   const v = VARIANTS[variant];
 
@@ -54,8 +60,10 @@ export function Button({
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
       disabled={isDisabled}
-      style={({ pressed }) => [
+      style={[
         {
           flexDirection: 'row',
           alignItems: 'center',
