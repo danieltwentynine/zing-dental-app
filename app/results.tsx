@@ -32,7 +32,7 @@ export default function ResultsScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tokens.surfacePage }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: 28, paddingTop: 8, alignItems: 'center' }}>
         <Text
-          className="font-display"
+          className="font-subhead"
           style={{ fontSize: 14, letterSpacing: 1.1, color: tokens.brandPrimary, marginTop: 6 }}
         >
           SESSION COMPLETE

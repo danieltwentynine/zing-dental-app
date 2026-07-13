@@ -65,7 +65,7 @@ export function BadgeCard({ type = 'firstSession', name, earned = true, caption 
         )}
       </View>
       <View style={{ alignItems: 'center', rowGap: 2 }}>
-        <Text className="font-display" style={{ fontSize: 14, color: tokens.textPrimary, textAlign: 'center' }}>
+        <Text className="font-subhead" style={{ fontSize: 14, color: tokens.textPrimary, textAlign: 'center' }}>
           {name ?? meta.label}
         </Text>
         {caption ? (

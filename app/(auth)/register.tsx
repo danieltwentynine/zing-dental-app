@@ -188,7 +188,7 @@ export default function RegisterScreen() {
           <View className="mt-4 flex-row justify-center">
             <Text className="font-body text-muted">Already have an account? </Text>
             <Pressable onPress={() => router.replace('/(auth)/login')}>
-              <Text className="font-display text-mint-600">Log in</Text>
+              <Text className="font-subhead text-mint-600">Log in</Text>
             </Pressable>
           </View>
         </ScrollView>

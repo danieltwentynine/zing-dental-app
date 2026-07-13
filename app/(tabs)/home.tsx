@@ -15,7 +15,7 @@ import { useAuthStore } from '@/stores/authStore';
 
 function SectionTitle({ children }: { children: string }) {
   return (
-    <Text className="font-display" style={{ fontSize: 19, color: tokens.textPrimary, marginBottom: 12 }}>
+    <Text className="font-subhead" style={{ fontSize: 19, color: tokens.textPrimary, marginBottom: 12 }}>
       {children}
     </Text>
   );
@@ -156,7 +156,7 @@ export default function HomeScreen() {
                     <s.Icon size={24} color={tokens.textTertiary} weight="fill" />
                   )}
                 </View>
-                <Text className="font-display" style={{ fontSize: 15, color: tokens.textPrimary }}>
+                <Text className="font-subhead" style={{ fontSize: 15, color: tokens.textPrimary }}>
                   {s.label}
                 </Text>
                 <Text

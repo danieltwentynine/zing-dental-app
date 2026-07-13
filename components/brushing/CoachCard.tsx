@@ -53,7 +53,7 @@ export function CoachCard({ message, score = null, title = 'Sparky says', style 
       <SparkyMini size={56} />
       <View style={{ flex: 1, rowGap: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
-          <Text className="font-display" style={{ fontSize: 15, color: palette.mint[700] }}>
+          <Text className="font-subhead" style={{ fontSize: 15, color: palette.mint[700] }}>
             {title}
           </Text>
           {score != null ? (

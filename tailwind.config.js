@@ -69,9 +69,12 @@ module.exports = {
         '2xl': '32px',
       },
       fontFamily: {
-        display: ['Nunito_800ExtraBold'],
-        body: ['NunitoSans_400Regular'],
-        bodySemibold: ['NunitoSans_600SemiBold'],
+        // Baloo 2 app-wide (design system font exploration, option 1b):
+        // heading 800 / subhead 700 / body 500 / label 600
+        display: ['Baloo2_800ExtraBold'],
+        subhead: ['Baloo2_700Bold'],
+        body: ['Baloo2_500Medium'],
+        bodySemibold: ['Baloo2_600SemiBold'],
         numeric: ['SpaceGrotesk_700Bold'],
       },
     },

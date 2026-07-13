@@ -65,7 +65,7 @@ export function Input({ label, error, icon, containerStyle, onFocus, onBlur, ...
           }}
           style={{
             flex: 1,
-            fontFamily: 'NunitoSans_400Regular',
+            fontFamily: 'Baloo2_500Medium',
             fontSize: 16,
             color: tokens.textPrimary,
             padding: 0,

@@ -126,7 +126,7 @@ export default function LoginScreen() {
           <View className="mt-4 flex-row justify-center">
             <Text className="font-body text-muted">New to Zing? </Text>
             <Pressable onPress={() => router.replace('/(auth)/register')}>
-              <Text className="font-display text-mint-600">Create an account</Text>
+              <Text className="font-subhead text-mint-600">Create an account</Text>
             </Pressable>
           </View>
         </ScrollView>

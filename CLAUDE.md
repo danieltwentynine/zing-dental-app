@@ -248,9 +248,10 @@ IDLE → COUNTDOWN (3s) → ACTIVE → PAUSED → COMPLETED → RESULTS
 - Danger: Only for auth errors, never shown to children
 
 **Typography:**
-- Display/headings: `Nunito` (rounded, friendly) — weight 800
-- Body: `Nunito Sans` — weight 400/600
-- Numbers/scores: `Space Grotesk` — weight 700
+- UI typeface: `Baloo 2` (chunky, warm, rounded) — single family app-wide, per design-system font exploration option 1b
+  - Headings: weight 800 · Subheads/section titles/buttons: 700 · Body: 500 · Labels/captions: 600
+- Numbers/scores: `Space Grotesk` — weight 700 (unchanged)
+- Brand wordmark only: `Nunito` 800 (in `ZingBrand.tsx` — the logo is not UI text)
 
 **Tone (copy):**
 - For children: enthusiastic, uses "!" sparingly, never clinical
@@ -346,7 +347,7 @@ There is no linter configured yet. The TypeScript compiler in strict mode is the
 - Path alias `@/*` maps to the repo root (see `tsconfig.json`). Use it for all cross-directory imports.
 - NativeWind v4 is wired through `babel.config.js` (`jsxImportSource: 'nativewind'` + `nativewind/babel`), `metro.config.js` (`withNativeWind` with `global.css`), and `tailwind.config.js` (design-system colors and font families as Tailwind tokens: `primary`, `ink`, `muted`, `font-display`, `font-body`, etc.).
 - Firebase Auth uses `initializeAuth` + `getReactNativePersistence(AsyncStorage)` in `lib/firebase.ts`. The firebase v12 wrapper's web typings omit `getReactNativePersistence` (it exists in the RN runtime build) — `types/firebase-auth.d.ts` augments the module; do not work around it with `@ts-ignore`.
-- Fonts are loaded once in `app/_layout.tsx` via `@expo-google-fonts/*` packages and referenced by PostScript name in Tailwind (`Nunito_800ExtraBold`, `NunitoSans_400Regular`, `NunitoSans_600SemiBold`, `SpaceGrotesk_700Bold`).
+- Fonts are loaded once in `app/_layout.tsx` via `@expo-google-fonts/*` packages and referenced by PostScript name in Tailwind: `font-display` → `Baloo2_800ExtraBold`, `font-subhead` → `Baloo2_700Bold`, `font-body` → `Baloo2_500Medium`, `font-bodySemibold` → `Baloo2_600SemiBold`, `font-numeric` → `SpaceGrotesk_700Bold`. `Nunito_800ExtraBold` stays loaded solely for the SVG wordmark in `ZingBrand.tsx`.
 - Auth state flows: `onAuthStateChanged` subscription in `app/_layout.tsx` → `stores/authStore.ts` (Zustand) → `app/index.tsx` redirects to `(auth)/register` or `onboarding/child-setup`.
 
 ---

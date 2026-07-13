@@ -225,7 +225,7 @@ export default function SessionScreen() {
                 borderRadius: 999,
               }}
             >
-              <Text className="font-display" style={{ fontSize: 15, color: '#fff' }}>
+              <Text className="font-subhead" style={{ fontSize: 15, color: '#fff' }}>
                 I'm done
               </Text>
             </Pressable>

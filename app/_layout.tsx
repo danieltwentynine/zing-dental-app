@@ -1,10 +1,13 @@
 import '../global.css';
 
-import { Nunito_800ExtraBold, useFonts } from '@expo-google-fonts/nunito';
 import {
-  NunitoSans_400Regular,
-  NunitoSans_600SemiBold,
-} from '@expo-google-fonts/nunito-sans';
+  Baloo2_500Medium,
+  Baloo2_600SemiBold,
+  Baloo2_700Bold,
+  Baloo2_800ExtraBold,
+  useFonts,
+} from '@expo-google-fonts/baloo-2';
+import { Nunito_800ExtraBold } from '@expo-google-fonts/nunito';
 import { SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -19,9 +22,11 @@ export default function RootLayout() {
   const setUser = useAuthStore((state) => state.setUser);
 
   const [fontsLoaded] = useFonts({
-    Nunito_800ExtraBold,
-    NunitoSans_400Regular,
-    NunitoSans_600SemiBold,
+    Baloo2_500Medium,
+    Baloo2_600SemiBold,
+    Baloo2_700Bold,
+    Baloo2_800ExtraBold,
+    Nunito_800ExtraBold, // wordmark only (ZingBrand) — UI text uses Baloo 2
     SpaceGrotesk_700Bold,
   });
 

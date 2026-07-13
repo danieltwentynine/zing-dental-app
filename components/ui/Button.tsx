@@ -82,7 +82,7 @@ export function Button({
         <>
           {icon}
           <Text
-            className="font-display"
+            className="font-subhead"
             style={{ color: v.fg, fontSize: s.font, lineHeight: s.font * 1.1 }}
           >
             {label}

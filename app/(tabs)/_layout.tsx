@@ -20,7 +20,7 @@ function TabItem({
   return (
     <Pressable onPress={onPress} style={{ flex: 1, alignItems: 'center', rowGap: 4 }}>
       {icon(color, active ? 'fill' : 'bold')}
-      <Text className="font-bodySemibold" style={{ fontSize: 11, color, fontWeight: '700' }}>
+      <Text className="font-subhead" style={{ fontSize: 11, color }}>
         {label}
       </Text>
     </Pressable>
@@ -83,8 +83,8 @@ function ZingTabBar({ state, navigation }: TabBarProps) {
           <Tooth size={30} color="#fff" weight="fill" />
         </Pressable>
         <Text
-          className="font-bodySemibold"
-          style={{ position: 'absolute', top: 46, fontSize: 11, color: tokens.brandPrimary, fontWeight: '700' }}
+          className="font-subhead"
+          style={{ position: 'absolute', top: 46, fontSize: 11, color: tokens.brandPrimary }}
         >
           Brush
         </Text>
