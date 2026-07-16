@@ -9,20 +9,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrushTimer } from '@/components/brushing/BrushTimer';
 import { MouthMap, type ZoneState } from '@/components/brushing/MouthMap';
 import { buildCoachMessage } from '@/lib/coach';
-import { BRUSHING_DURATION_SECONDS, COUNTDOWN_SECONDS } from '@/lib/constants';
+import { ALL_TOOTH_ZONES, BRUSHING_DURATION_SECONDS, COUNTDOWN_SECONDS } from '@/lib/constants';
 import { saveSession } from '@/lib/sessions';
 import { tokens } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
 import { useChildStore } from '@/stores/childStore';
 import { useSessionStore } from '@/stores/sessionStore';
 import type { ToothZone } from '@/types';
-
-// Guide order ends with the back teeth, so stopping early leaves them un-brushed
-// — exactly the "reach your back teeth" coaching moment from the design.
-const GUIDE_ORDER: ToothZone[] = [
-  'top-front', 'top-left', 'top-right', 'top-back-left', 'top-back-right',
-  'bottom-front', 'bottom-left', 'bottom-right', 'bottom-back-left', 'bottom-back-right',
-];
 
 const ZONE_HINTS: Record<ToothZone, string> = {
   'top-front': 'Brush your top front teeth',
@@ -52,13 +45,13 @@ export default function SessionScreen() {
   // Zone progress is derived from the clock: one source of truth, no drift.
   const elapsed = BRUSHING_DURATION_SECONDS - remaining;
   const zonesReached = Math.min(
-    GUIDE_ORDER.length,
-    Math.floor((elapsed / BRUSHING_DURATION_SECONDS) * GUIDE_ORDER.length),
+    ALL_TOOTH_ZONES.length,
+    Math.floor((elapsed / BRUSHING_DURATION_SECONDS) * ALL_TOOTH_ZONES.length),
   );
 
   const zoneStates = useMemo(() => {
     const ns: Partial<Record<ToothZone, ZoneState>> = {};
-    GUIDE_ORDER.forEach((z, i) => {
+    ALL_TOOTH_ZONES.forEach((z, i) => {
       if (i < zonesReached) ns[z] = 'done';
       else if (i === zonesReached) ns[z] = 'active';
     });
@@ -83,13 +76,13 @@ export default function SessionScreen() {
     const total = BRUSHING_DURATION_SECONDS;
     const elapsedAtFinish = Math.min(total, Math.max(0, total - remainingRef.current));
     const reached = Math.min(
-      GUIDE_ORDER.length,
-      Math.floor((elapsedAtFinish / total) * GUIDE_ORDER.length),
+      ALL_TOOTH_ZONES.length,
+      Math.floor((elapsedAtFinish / total) * ALL_TOOTH_ZONES.length),
     );
 
     const final: Partial<Record<ToothZone, ZoneState>> = {};
     const missed: ToothZone[] = [];
-    GUIDE_ORDER.forEach((z, i) => {
+    ALL_TOOTH_ZONES.forEach((z, i) => {
       if (i < reached) {
         final[z] = 'done';
       } else {
@@ -98,10 +91,10 @@ export default function SessionScreen() {
       }
     });
 
-    const score = Math.round((reached / GUIDE_ORDER.length) * 100);
+    const score = Math.round((reached / ALL_TOOTH_ZONES.length) * 100);
     const coachMessage = buildCoachMessage(child?.name ?? 'friend', missed, score);
     const coverage: Record<string, number> = {};
-    GUIDE_ORDER.forEach((z) => {
+    ALL_TOOTH_ZONES.forEach((z) => {
       coverage[z] = final[z] === 'done' ? 100 : 0;
     });
 
@@ -118,7 +111,7 @@ export default function SessionScreen() {
         childId: child.id,
         parentUid: user.uid,
         durationSeconds: elapsedAtFinish,
-        zonesDetected: GUIDE_ORDER.slice(0, reached),
+        zonesDetected: ALL_TOOTH_ZONES.slice(0, reached),
         zonesCoverage: coverage,
         score,
         coachMessage,
@@ -145,7 +138,7 @@ export default function SessionScreen() {
     return () => clearInterval(interval);
   }, [phase, finish]);
 
-  const currentZone = GUIDE_ORDER[Math.min(zonesReached, GUIDE_ORDER.length - 1)];
+  const currentZone = ALL_TOOTH_ZONES[Math.min(zonesReached, ALL_TOOTH_ZONES.length - 1)];
 
   return (
     <LinearGradient colors={['#0b3b3a', '#051c20']} style={{ flex: 1 }}>

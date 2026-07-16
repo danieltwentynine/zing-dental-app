@@ -107,13 +107,6 @@ export const shadows = {
     shadowRadius: 8,
     elevation: 2,
   },
-  md: {
-    shadowColor: palette.ink[900],
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    elevation: 5,
-  },
   card: {
     shadowColor: palette.ink[900],
     shadowOffset: { width: 0, height: 10 },
@@ -144,11 +137,7 @@ export const shadows = {
   },
 } satisfies Record<string, ViewStyle>;
 
-/** Springy, friendly motion. Mirrors --ease-* / --dur-* tokens. */
+/** Springy, friendly motion. */
 export const motion = {
-  durFast: 140,
-  durBase: 240,
-  durSlow: 420,
-  durCelebrate: 700,
   pressScale: 0.96,
 } as const;

@@ -15,7 +15,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect } from 'react';
 
 import { auth } from '@/lib/firebase';
-import { COLORS } from '@/lib/constants';
+import { tokens } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function RootLayout() {
@@ -45,7 +45,7 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: COLORS.background },
+          contentStyle: { backgroundColor: tokens.surfacePage },
         }}
       />
     </>

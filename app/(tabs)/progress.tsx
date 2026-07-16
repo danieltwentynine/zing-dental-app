@@ -8,7 +8,9 @@ import { BadgeCard } from '@/components/kids/BadgeCard';
 import { StreakDisplay } from '@/components/kids/StreakDisplay';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { SectionTitle } from '@/components/ui/SectionTitle';
 import { useActiveChild } from '@/hooks/useActiveChild';
+import { sameDay } from '@/lib/dates';
 import { fetchRecentSessions, type RecentSession } from '@/lib/sessions';
 import { radius, tokens } from '@/lib/tokens';
 import type { Badge as BadgeType } from '@/types';
@@ -16,20 +18,6 @@ import type { Badge as BadgeType } from '@/types';
 const WEEK_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const BADGE_TYPES: BadgeType['type'][] = ['firstSession', 'streak', 'perfect', 'weeklyGoal'];
 const HISTORY_LENGTH = 5;
-
-function SectionTitle({ children }: { children: string }) {
-  return (
-    <Text className="font-subhead" style={{ fontSize: 19, color: tokens.textPrimary, marginBottom: 12 }}>
-      {children}
-    </Text>
-  );
-}
-
-function sameDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
-  );
-}
 
 function formatSessionDay(date: Date): string {
   const now = new Date();

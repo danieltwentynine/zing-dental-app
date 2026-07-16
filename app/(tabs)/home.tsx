@@ -8,27 +8,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/kids/Avatar';
 import { StreakDisplay } from '@/components/kids/StreakDisplay';
 import { Card } from '@/components/ui/Card';
+import { SectionTitle } from '@/components/ui/SectionTitle';
 import { useActiveChild } from '@/hooks/useActiveChild';
+import { sameDay } from '@/lib/dates';
 import { fetchRecentSessions, type RecentSession } from '@/lib/sessions';
 import { palette, radius, shadows, tokens } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
-
-function SectionTitle({ children }: { children: string }) {
-  return (
-    <Text className="font-subhead" style={{ fontSize: 19, color: tokens.textPrimary, marginBottom: 12 }}>
-      {children}
-    </Text>
-  );
-}
-
-function isToday(date: Date): boolean {
-  const now = new Date();
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  );
-}
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
@@ -59,7 +44,7 @@ export default function HomeScreen() {
       if (!child) return;
       let cancelled = false;
       fetchRecentSessions(child.parentUid, child.id, 10).then((sessions) => {
-        if (!cancelled) setTodaySessions(sessions.filter((s) => isToday(s.completedAt)));
+        if (!cancelled) setTodaySessions(sessions.filter((s) => sameDay(s.completedAt, new Date())));
       });
       return () => {
         cancelled = true;

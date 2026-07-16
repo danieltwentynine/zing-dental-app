@@ -11,7 +11,7 @@ import {
 import { z } from 'zod';
 
 import type { ToothZone } from '@/types';
-import { db } from '@/lib/firebase';
+import { db, timestampToDate } from '@/lib/firebase';
 
 export interface SavedSessionInput {
   childId: string;
@@ -29,10 +29,6 @@ export interface RecentSession {
   score: number;
   completedAt: Date;
 }
-
-const timestampToDate = z
-  .custom<Timestamp>((v) => v instanceof Timestamp)
-  .transform((t) => t.toDate());
 
 const sessionDocSchema = z.object({
   score: z.number(),

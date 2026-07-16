@@ -1,5 +1,4 @@
 import {
-  Timestamp,
   addDoc,
   collection,
   getDocs,
@@ -10,11 +9,7 @@ import {
 import { z } from 'zod';
 
 import type { Badge, ChildProfile } from '@/types';
-import { db } from '@/lib/firebase';
-
-const timestampToDate = z
-  .custom<Timestamp>((v) => v instanceof Timestamp)
-  .transform((t) => t.toDate());
+import { db, timestampToDate } from '@/lib/firebase';
 
 const badgeSchema = z.object({
   id: z.string(),

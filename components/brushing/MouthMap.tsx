@@ -10,7 +10,7 @@ export type ZoneState = 'empty' | 'active' | 'done' | 'missed';
  * Zone order around the arch (upper L→R across the top, lower L→R across the
  * bottom). This drives the SVG sector layout, so the order is intentional.
  */
-export const MOUTH_ZONES: ToothZone[] = [
+const MOUTH_ZONES: ToothZone[] = [
   'top-back-left', 'top-left', 'top-front', 'top-right', 'top-back-right',
   'bottom-back-left', 'bottom-left', 'bottom-front', 'bottom-right', 'bottom-back-right',
 ];
