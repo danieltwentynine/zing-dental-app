@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Text, TextInput, View, type TextInputProps, type ViewStyle } from 'react-native';
 
 import { palette, radius, tokens } from '@/lib/tokens';
@@ -16,6 +16,12 @@ interface InputProps extends TextInputProps {
  */
 export function Input({ label, error, icon, containerStyle, onFocus, onBlur, ...rest }: InputProps) {
   const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    console.log('[Input] MOUNT', label);
+    return () => console.log('[Input] UNMOUNT', label);
+  }, [label]);
+
   const borderColor = error
     ? tokens.feedbackDanger
     : focused
@@ -56,10 +62,12 @@ export function Input({ label, error, icon, containerStyle, onFocus, onBlur, ...
         <TextInput
           placeholderTextColor={tokens.textTertiary}
           onFocus={(e) => {
+            console.log('[Input] focus', label);
             setFocused(true);
             onFocus?.(e);
           }}
           onBlur={(e) => {
+            console.log('[Input] blur', label);
             setFocused(false);
             onBlur?.(e);
           }}
