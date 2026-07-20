@@ -10,7 +10,8 @@
       "Read(//private/tmp/**)",
       "Bash(xcrun simctl *)",
       "Bash(curl -s \"http://localhost:8081/index.bundle?platform=ios&dev=true\" -o /tmp/bundle-check.js)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(npx tsc *)"
     ]
   },
   "hooks": {

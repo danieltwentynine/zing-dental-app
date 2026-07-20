@@ -1,8 +1,9 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
+import { signOut } from 'firebase/auth';
 import { CheckCircle, Gear, Moon, Play, Sun } from 'phosphor-react-native';
 import { useCallback, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/kids/Avatar';
@@ -13,7 +14,9 @@ import { useActiveChild } from '@/hooks/useActiveChild';
 import { sameDay } from '@/lib/dates';
 import { fetchRecentSessions, type RecentSession } from '@/lib/sessions';
 import { palette, radius, shadows, tokens } from '@/lib/tokens';
+import { auth } from '@/lib/firebase';
 import { useAuthStore } from '@/stores/authStore';
+import { useChildStore } from '@/stores/childStore';
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
@@ -23,6 +26,27 @@ function greetingForHour(hour: number): string {
   if (hour < 12) return 'Good morning,';
   if (hour < 18) return 'Good afternoon,';
   return 'Good evening,';
+}
+
+function confirmLogOut(): void {
+  Alert.alert('Log out?', "You'll need to sign in again to see your child's progress.", [
+    { text: 'Stay signed in', style: 'cancel' },
+    {
+      text: 'Log out',
+      style: 'destructive',
+      onPress: async () => {
+        try {
+          await signOut(auth);
+        } catch {
+          Alert.alert('Could not log out', 'Please check your connection and try again.');
+          return;
+        }
+        // No auth guard on (tabs) — nothing navigates on sign-out by itself.
+        useChildStore.getState().clear();
+        router.replace('/onboarding/welcome');
+      },
+    },
+  ]);
 }
 
 interface Slot {
@@ -85,8 +109,11 @@ export default function HomeScreen() {
               {parentName}
             </Text>
           </View>
-          <View
-            style={[
+          <Pressable
+            onPress={confirmLogOut}
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+            style={({ pressed }) => [
               {
                 width: 44,
                 height: 44,
@@ -94,12 +121,13 @@ export default function HomeScreen() {
                 backgroundColor: tokens.surfaceCard,
                 alignItems: 'center',
                 justifyContent: 'center',
+                transform: [{ scale: pressed ? 0.94 : 1 }],
               },
               shadows.sm,
             ]}
           >
             <Gear size={22} color={tokens.textSecondary} weight="bold" />
-          </View>
+          </Pressable>
         </View>
 
         {/* Active child card */}
