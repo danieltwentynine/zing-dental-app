@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { FirebaseError } from 'firebase/app';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { ArrowLeft, EnvelopeSimple, LockSimple } from 'phosphor-react-native';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -39,19 +39,47 @@ function loginErrorMessage(error: unknown): string {
 
 export default function LoginScreen() {
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const { control, handleSubmit, formState } = useForm<LoginFormValues>({
+  const [resetNotice, setResetNotice] = useState<string | null>(null);
+  const [sendingReset, setSendingReset] = useState(false);
+  const { control, handleSubmit, formState, getValues } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
 
   const onSubmit = async ({ email, password }: LoginFormValues) => {
     setSubmitError(null);
+    setResetNotice(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.replace('/');
     } catch (error) {
       setSubmitError(loginErrorMessage(error));
     }
+  };
+
+  const onForgotPassword = async () => {
+    if (sendingReset) return;
+    const email = getValues('email').trim();
+    if (!loginSchema.shape.email.safeParse(email).success) {
+      setResetNotice(null);
+      setSubmitError('Enter the email you signed up with, then tap this again.');
+      return;
+    }
+    setSubmitError(null);
+    setSendingReset(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      // Never confirm whether an address has an account — that would let anyone
+      // probe this screen for which parents are registered.
+      if (!(error instanceof FirebaseError && error.code === 'auth/user-not-found')) {
+        setSubmitError(loginErrorMessage(error));
+        return;
+      }
+    } finally {
+      setSendingReset(false);
+    }
+    setResetNotice(`If ${email} has a Zing account, a reset link is on its way. Check your inbox.`);
   };
 
   return (
@@ -112,8 +140,23 @@ export default function LoginScreen() {
             />
           </View>
 
+          <Pressable
+            onPress={onForgotPassword}
+            disabled={sendingReset}
+            hitSlop={8}
+            style={{ alignSelf: 'flex-end', marginTop: 10 }}
+          >
+            <Text className="font-subhead text-sm text-mint-600">
+              {sendingReset ? 'Sending…' : 'Forgot my password'}
+            </Text>
+          </Pressable>
+
           {submitError ? (
             <Text className="mt-4 font-bodySemibold text-sm text-danger">{submitError}</Text>
+          ) : null}
+
+          {resetNotice ? (
+            <Text className="mt-4 font-bodySemibold text-sm text-mint-600">{resetNotice}</Text>
           ) : null}
 
           <Button
