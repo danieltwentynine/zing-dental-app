@@ -6,7 +6,11 @@
       "Bash(env)",
       "Bash(npm install *)",
       "Bash(rm -rf Pods Podfile.lock build)",
-      "Bash(pod install *)"
+      "Bash(pod install *)",
+      "Read(//private/tmp/**)",
+      "Bash(xcrun simctl *)",
+      "Bash(curl -s \"http://localhost:8081/index.bundle?platform=ios&dev=true\" -o /tmp/bundle-check.js)",
+      "Read(//tmp/**)"
     ]
   },
   "hooks": {

@@ -121,6 +121,7 @@ export default function RegisterScreen() {
         <ScrollView
           contentContainerClassName="flex-grow px-6 pb-7 pt-1"
           keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets={false}
         >
           <Pressable
             onPress={() => router.back()}
