@@ -11,7 +11,8 @@
       "Bash(xcrun simctl *)",
       "Bash(curl -s \"http://localhost:8081/index.bundle?platform=ios&dev=true\" -o /tmp/bundle-check.js)",
       "Read(//tmp/**)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npm view *)"
     ]
   },
   "hooks": {

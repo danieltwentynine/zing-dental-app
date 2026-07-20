@@ -15,6 +15,7 @@ import { sameDay } from '@/lib/dates';
 import { fetchRecentSessions, type RecentSession } from '@/lib/sessions';
 import { palette, radius, shadows, tokens } from '@/lib/tokens';
 import { auth } from '@/lib/firebase';
+import { signOutGoogle } from '@/lib/socialAuth';
 import { useAuthStore } from '@/stores/authStore';
 import { useChildStore } from '@/stores/childStore';
 
@@ -37,6 +38,7 @@ function confirmLogOut(): void {
       onPress: async () => {
         try {
           await signOut(auth);
+          await signOutGoogle();
         } catch {
           Alert.alert('Could not log out', 'Please check your connection and try again.');
           return;

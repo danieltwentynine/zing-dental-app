@@ -69,14 +69,13 @@ function FormField({ control, name, label, placeholder, icon, ...inputProps }: F
     <Controller
       control={control}
       name={name}
-      render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+      render={({ field: { onChange, value }, fieldState: { error } }) => (
         <Input
           label={label}
           placeholder={placeholder}
           icon={icon}
           value={value}
           onChangeText={onChange}
-          onBlur={onBlur}
           error={error?.message}
           {...inputProps}
         />

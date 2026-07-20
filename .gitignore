@@ -39,3 +39,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# misc
+.expo-shared/
+
+# local files
+GoogleService-Info.plist
