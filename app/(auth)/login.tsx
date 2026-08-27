@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { router } from 'expo-router';
 import { FirebaseError } from 'firebase/app';
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
@@ -13,7 +12,6 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { SafeScreen } from '@/components/ui/SafeScreen';
 import { auth } from '@/lib/firebase';
-import { signInWithGoogle } from '@/lib/socialAuth';
 import { tokens } from '@/lib/tokens';
 
 const loginSchema = z.object({
@@ -43,29 +41,10 @@ export default function LoginScreen() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [resetNotice, setResetNotice] = useState<string | null>(null);
   const [sendingReset, setSendingReset] = useState(false);
-  const [googlePending, setGooglePending] = useState(false);
   const { control, handleSubmit, formState, getValues } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
-
-  const onGoogleSignIn = async () => {
-    if (googlePending) return;
-    setSubmitError(null);
-    setResetNotice(null);
-    setGooglePending(true);
-    try {
-      const result = await signInWithGoogle();
-      if (result.status === 'cancelled') return;
-      if (result.status === 'error') {
-        setSubmitError(result.message);
-        return;
-      }
-      router.replace(result.isNewUser ? '/onboarding/child-setup' : '/');
-    } finally {
-      setGooglePending(false);
-    }
-  };
 
   const onSubmit = async ({ email, password }: LoginFormValues) => {
     setSubmitError(null);
@@ -183,24 +162,7 @@ export default function LoginScreen() {
             size="lg"
             onPress={handleSubmit(onSubmit)}
             loading={formState.isSubmitting}
-            disabled={googlePending}
             style={{ marginTop: 20 }}
-          />
-
-          <View className="my-5 flex-row items-center" style={{ columnGap: 12 }}>
-            <View className="h-px flex-1" style={{ backgroundColor: tokens.borderSubtle }} />
-            <Text className="font-body text-sm text-muted">or</Text>
-            <View className="h-px flex-1" style={{ backgroundColor: tokens.borderSubtle }} />
-          </View>
-
-          {/* Google's own button component — brand-guideline compliant by
-              construction, so its appearance is deliberately not restyled. */}
-          <GoogleSigninButton
-            size={GoogleSigninButton.Size.Wide}
-            color={GoogleSigninButton.Color.Light}
-            disabled={googlePending}
-            onPress={onGoogleSignIn}
-            style={{ width: '100%', height: 56 }}
           />
 
           <View className="mt-6 flex-row justify-center">

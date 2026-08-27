@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Text, TextInput, View, type TextInputProps, type ViewStyle } from 'react-native';
 
 import { palette, radius, tokens } from '@/lib/tokens';
@@ -16,11 +16,6 @@ interface InputProps extends TextInputProps {
  */
 export function Input({ label, error, icon, containerStyle, onFocus, onBlur, ...rest }: InputProps) {
   const [focused, setFocused] = useState(false);
-
-  useEffect(() => {
-    console.log('[Input] MOUNT', label);
-    return () => console.log('[Input] UNMOUNT', label);
-  }, [label]);
 
   const borderColor = error
     ? tokens.feedbackDanger
@@ -46,28 +41,25 @@ export function Input({ label, error, icon, containerStyle, onFocus, onBlur, ...
           backgroundColor: rest.editable === false ? tokens.surfaceSunken : tokens.surfaceCard,
           borderWidth: 1.5,
           borderColor,
-          // mint focus ring
-          ...(focused && !error
-            ? {
-                shadowColor: palette.mint[500],
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.18,
-                shadowRadius: 5,
-                elevation: 2,
-              }
-            : null),
+          // mint focus ring — the shadow props must stay present at all times and
+          // only change value. Adding/removing them on focus makes Fabric recreate
+          // the native view, which resigns first responder and instantly blurs the
+          // field (facebook/react-native#53440).
+          shadowColor: palette.mint[500],
+          shadowOffset: { width: 0, height: 0 },
+          shadowRadius: 5,
+          shadowOpacity: focused && !error ? 0.18 : 0,
+          elevation: focused && !error ? 2 : 0,
         }}
       >
         {icon}
         <TextInput
           placeholderTextColor={tokens.textTertiary}
           onFocus={(e) => {
-            console.log('[Input] focus', label);
             setFocused(true);
             onFocus?.(e);
           }}
           onBlur={(e) => {
-            console.log('[Input] blur', label);
             setFocused(false);
             onBlur?.(e);
           }}

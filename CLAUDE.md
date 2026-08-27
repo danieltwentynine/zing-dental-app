@@ -6,6 +6,7 @@
 Zing is an iOS-first mobile app that uses the phone camera to coach children through proper teeth brushing in real time. The AI watches the brushing session via camera, maps which zones of the mouth were brushed, and delivers a personalized, kid-friendly coaching message at the end. The app is built by a dentist mother and her developer son.
 
 **Core loop:**
+
 1. Parent sets up child profile (age, name, avatar)
 2. Child opens the app, positions phone so camera sees their mouth
 3. 2-minute brushing session with live zone detection overlay
