@@ -21,6 +21,8 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 
 export default function ResultsScreen() {
   const result = useSessionStore((s) => s.lastResult);
+  const saveStatus = useSessionStore((s) => s.saveStatus);
+  const retrySave = useSessionStore((s) => s.saveLastResult);
 
   if (!result) {
     return <Redirect href="/(tabs)/home" />;
@@ -61,6 +63,35 @@ export default function ResultsScreen() {
         </View>
 
         <CoachCard score={result.score} message={result.coachMessage} style={{ width: '100%' }} />
+
+        {/* Save state, in the child's language — never an error message, and it
+            never blocks the buttons below (offline, "saving" is the resting state). */}
+        {saveStatus === 'saving' ? (
+          <Text
+            className="font-bodySemibold"
+            style={{ fontSize: 13, color: tokens.textTertiary, marginTop: 14 }}
+          >
+            Saving your session…
+          </Text>
+        ) : null}
+
+        {saveStatus === 'failed' ? (
+          <View style={{ alignItems: 'center', rowGap: 10, marginTop: 14 }}>
+            <Text
+              className="font-bodySemibold"
+              style={{ fontSize: 13, color: tokens.zoneMissed, textAlign: 'center' }}
+            >
+              This one hasn't reached your progress yet.
+            </Text>
+            <Button
+              label="Try saving again"
+              variant="ghost"
+              size="sm"
+              fullWidth={false}
+              onPress={() => void retrySave()}
+            />
+          </View>
+        ) : null}
 
         <View style={{ width: '100%', rowGap: 12, marginTop: 'auto', paddingTop: 22 }}>
           <Button label="See my progress" size="lg" onPress={() => router.replace('/(tabs)/progress')} />

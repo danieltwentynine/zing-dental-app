@@ -12,14 +12,14 @@ import { tokens } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
 import { useChildStore } from '@/stores/childStore';
 
-const AGES = [4, 5, 6, 7, 8, 9];
+const AGES = [4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export default function ChildSetupScreen() {
   const user = useAuthStore((s) => s.user);
   const setActiveChild = useChildStore((s) => s.setActiveChild);
 
   const [name, setName] = useState('');
-  const [age, setAge] = useState(6);
+  const [age, setAge] = useState<number | null>(null);
   const [avatar, setAvatar] = useState('shark');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +29,10 @@ export default function ChildSetupScreen() {
     const trimmed = name.trim();
     if (trimmed.length < 1) {
       setError("Please add your child's name.");
+      return;
+    }
+    if (age === null || !AGES.includes(age)) {
+      setError("Please pick your child's age.");
       return;
     }
     setError(null);
@@ -74,10 +78,17 @@ export default function ChildSetupScreen() {
             <Input label="Child's name" placeholder="e.g. Leo" value={name} onChangeText={setName} />
 
             <View>
-              <Text className="mb-2 font-bodySemibold text-sm text-ink">Age</Text>
+              <Text className="mb-2 font-bodySemibold text-sm text-ink">How old is your child?</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 {AGES.map((a) => (
-                  <Chip key={a} label={String(a)} selected={age === a} onPress={() => setAge(a)} />
+                  <Chip
+                    key={a}
+                    label={String(a)}
+                    accessibilityLabel={`Age ${a}`}
+                    selected={age === a}
+                    onPress={() => setAge(a)}
+                    style={{ flexGrow: 1, flexBasis: '30%' }}
+                  />
                 ))}
               </View>
             </View>

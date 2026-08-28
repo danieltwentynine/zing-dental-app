@@ -1,11 +1,11 @@
 import {
   Timestamp,
-  addDoc,
   collection,
+  doc,
   getDocs,
   limit,
   query,
-  serverTimestamp,
+  setDoc,
   where,
 } from 'firebase/firestore';
 import { z } from 'zod';
@@ -14,8 +14,12 @@ import type { ToothZone } from '@/types';
 import { db, timestampToDate } from '@/lib/firebase';
 
 export interface SavedSessionInput {
+  id: string;
   childId: string;
   parentUid: string;
+  /** When brushing actually finished — captured at finish, so a later retry
+   *  files the session under the day it happened, not the day it was saved. */
+  completedAt: Date;
   durationSeconds: number;
   zonesDetected: ToothZone[];
   zonesCoverage: Record<string, number>;
@@ -35,14 +39,21 @@ const sessionDocSchema = z.object({
   completedAt: timestampToDate.optional(),
 });
 
-/** Persist a finished session. Returns the new id, or null on failure (never throws to the child UI). */
-export async function saveSession(input: SavedSessionInput): Promise<string | null> {
+/** Reserve an id up front so a retry overwrites the same doc instead of duplicating it. */
+export function newSessionId(): string {
+  return doc(collection(db, 'sessions')).id;
+}
+
+/** Persist a finished session — idempotent in `input.id`, never throws to the child UI. */
+export async function saveSession(input: SavedSessionInput): Promise<boolean> {
   try {
-    const ref = await addDoc(collection(db, 'sessions'), {
+    await setDoc(doc(db, 'sessions', input.id), {
       childId: input.childId,
       parentUid: input.parentUid,
-      startedAt: Timestamp.fromDate(new Date(Date.now() - input.durationSeconds * 1000)),
-      completedAt: serverTimestamp(),
+      startedAt: Timestamp.fromDate(
+        new Date(input.completedAt.getTime() - input.durationSeconds * 1000),
+      ),
+      completedAt: Timestamp.fromDate(input.completedAt),
       durationSeconds: input.durationSeconds,
       zonesDetected: input.zonesDetected,
       zonesCoverage: input.zonesCoverage,
@@ -50,9 +61,9 @@ export async function saveSession(input: SavedSessionInput): Promise<string | nu
       coachMessage: input.coachMessage,
       streak: input.streak,
     });
-    return ref.id;
+    return true;
   } catch {
-    return null;
+    return false;
   }
 }
 

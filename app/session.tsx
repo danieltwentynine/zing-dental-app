@@ -10,9 +10,7 @@ import { BrushTimer } from '@/components/brushing/BrushTimer';
 import { MouthMap, type ZoneState } from '@/components/brushing/MouthMap';
 import { buildCoachMessage } from '@/lib/coach';
 import { ALL_TOOTH_ZONES, BRUSHING_DURATION_SECONDS, COUNTDOWN_SECONDS } from '@/lib/constants';
-import { saveSession } from '@/lib/sessions';
 import { tokens } from '@/lib/tokens';
-import { useAuthStore } from '@/stores/authStore';
 import { useChildStore } from '@/stores/childStore';
 import { useSessionStore } from '@/stores/sessionStore';
 import type { ToothZone } from '@/types';
@@ -31,9 +29,9 @@ const ZONE_HINTS: Record<ToothZone, string> = {
 };
 
 export default function SessionScreen() {
-  const user = useAuthStore((s) => s.user);
   const child = useChildStore((s) => s.activeChild);
   const setLastResult = useSessionStore((s) => s.setLastResult);
+  const saveLastResult = useSessionStore((s) => s.saveLastResult);
 
   const [phase, setPhase] = useState<'countdown' | 'active'>('countdown');
   const [count, setCount] = useState(COUNTDOWN_SECONDS);
@@ -93,10 +91,6 @@ export default function SessionScreen() {
 
     const score = Math.round((reached / ALL_TOOTH_ZONES.length) * 100);
     const coachMessage = buildCoachMessage(child?.name ?? 'friend', missed, score);
-    const coverage: Record<string, number> = {};
-    ALL_TOOTH_ZONES.forEach((z) => {
-      coverage[z] = final[z] === 'done' ? 100 : 0;
-    });
 
     setLastResult({
       score,
@@ -106,21 +100,12 @@ export default function SessionScreen() {
       coachMessage,
     });
 
-    if (user && child) {
-      void saveSession({
-        childId: child.id,
-        parentUid: user.uid,
-        durationSeconds: elapsedAtFinish,
-        zonesDetected: ALL_TOOTH_ZONES.slice(0, reached),
-        zonesCoverage: coverage,
-        score,
-        coachMessage,
-        streak: child.streakCurrent,
-      });
-    }
+    // Fire-and-forget: the store reports progress to the results screen, so a
+    // slow or offline write never holds the child on the session screen.
+    void saveLastResult();
 
     setTimeout(() => router.replace('/results'), 350);
-  }, [child, user, setLastResult]);
+  }, [child, setLastResult, saveLastResult]);
 
   // Active session — a 2-minute guided walk through every zone. Side effects
   // live in the interval callback so the state updaters stay pure.

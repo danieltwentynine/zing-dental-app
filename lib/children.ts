@@ -1,9 +1,13 @@
 import {
+  Timestamp,
   addDoc,
   collection,
+  doc,
   getDocs,
+  increment,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { z } from 'zod';
@@ -29,6 +33,7 @@ const childDocSchema = z.object({
   totalSessions: z.number().default(0),
   badges: z.array(badgeSchema).default([]),
   createdAt: timestampToDate.optional(),
+  lastSessionAt: timestampToDate.optional(),
 });
 
 export interface NewChildInput {
@@ -92,4 +97,37 @@ export async function fetchActiveChild(parentUid: string): Promise<ChildProfile 
 
   children.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   return children[0];
+}
+
+/**
+ * Advance the child's counters after a session was persisted. `streakCurrent`
+ * and `now` come from the caller so the session doc and the profile agree on
+ * the same streak and the same clock reading.
+ *
+ * Returns the updated profile for the store, or null if the write failed — the
+ * session itself is already saved, so the counters catch up on the next one.
+ */
+export async function recordSession(
+  child: ChildProfile,
+  streakCurrent: number,
+  now: Date,
+): Promise<ChildProfile | null> {
+  const streakBest = Math.max(child.streakBest, streakCurrent);
+  try {
+    await updateDoc(doc(db, 'children', child.id), {
+      totalSessions: increment(1),
+      streakCurrent,
+      streakBest,
+      lastSessionAt: Timestamp.fromDate(now),
+    });
+  } catch {
+    return null;
+  }
+  return {
+    ...child,
+    totalSessions: child.totalSessions + 1,
+    streakCurrent,
+    streakBest,
+    lastSessionAt: now,
+  };
 }

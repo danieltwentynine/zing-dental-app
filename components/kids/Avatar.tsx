@@ -9,10 +9,10 @@ import {
   Rocket,
   Star,
 } from 'phosphor-react-native';
-import type { ComponentType } from 'react';
+import { useState, type ComponentType } from 'react';
 import { Pressable, View, type ViewStyle } from 'react-native';
 
-import { palette, radius, shadows, tokens } from '@/lib/tokens';
+import { motion, palette, radius, shadows, tokens } from '@/lib/tokens';
 
 type AvatarConfig = { Icon: ComponentType<IconProps>; bg: string };
 
@@ -82,19 +82,41 @@ interface AvatarPickerProps {
 
 /** AvatarPicker — the child chooses their character during onboarding. */
 export function AvatarPicker({ value = 'dog', onChange }: AvatarPickerProps) {
+  // Pressed state lives in React state because NativeWind's runtime drops
+  // Pressable's function-form style prop (nativewind/nativewind#1105).
+  const [pressedId, setPressedId] = useState<string | null>(null);
+
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: 8 }}>
       {AVATAR_IDS.map((id) => {
         const selected = id === value;
         return (
           <Pressable
             key={id}
             accessibilityRole="button"
+            accessibilityLabel={`${id} character`}
             accessibilityState={{ selected }}
             onPress={() => onChange?.(id)}
-            style={{ transform: [{ scale: selected ? 1.06 : 1 }] }}
+            onPressIn={() => setPressedId(id)}
+            onPressOut={() => setPressedId(null)}
+            // Fixed 4-column cells, tall enough for the selected ring (56 + 12),
+            // so choosing a character never reflows the grid.
+            style={{ width: '25%', height: 84, alignItems: 'center', justifyContent: 'center' }}
           >
-            <Avatar avatarId={id} size={62} ring={selected} />
+            <View
+              style={{
+                flex: 1,
+                alignSelf: 'stretch',
+                marginHorizontal: 4,
+                borderRadius: radius.xl,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: selected ? tokens.surfaceMint : 'transparent',
+                transform: [{ scale: pressedId === id ? motion.pressScale : 1 }],
+              }}
+            >
+              <Avatar avatarId={id} size={56} ring={selected} />
+            </View>
           </Pressable>
         );
       })}

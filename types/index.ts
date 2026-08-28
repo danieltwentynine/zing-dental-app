@@ -34,6 +34,7 @@ export interface ChildProfile {
   totalSessions: number;
   badges: Badge[];
   createdAt: Date;
+  lastSessionAt?: Date;
 }
 
 export interface Badge {
