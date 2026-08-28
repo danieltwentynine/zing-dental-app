@@ -44,10 +44,12 @@ export const palette = {
     50: '#f8fafc',
   },
   white: '#ffffff',
-  sunny: { 100: '#fff3cf', 500: '#ffcb3d' },
-  coral: { 100: '#ffe1e5', 500: '#ff7a8a' },
-  grape: { 100: '#ebe7ff', 500: '#9b8cff' },
-  warning: { 100: '#fff1dc', 500: '#ffb347' },
+  // The 700s exist because no 500 in these four ramps clears 3:1 against white
+  // (they top out at 2.77:1), so none can carry a white icon — see Avatar.tsx.
+  sunny: { 100: '#fff3cf', 500: '#ffcb3d', 700: '#a8850f' },
+  coral: { 100: '#ffe1e5', 500: '#ff7a8a', 700: '#d13a55' },
+  grape: { 100: '#ebe7ff', 500: '#9b8cff', 700: '#6d4fd6' },
+  warning: { 100: '#fff1dc', 500: '#ffb347', 700: '#c0560c' },
   danger: { 100: '#fde8e8', 500: '#dc2626' },
 } as const;
 

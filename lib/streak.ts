@@ -1,13 +1,20 @@
-/** Local-day number: identical for any two Dates on the same calendar day. */
+/**
+ * Civil-day number: identical for any two Dates that fall on the same local
+ * calendar date. Read from the date's local Y/M/D (same convention as
+ * `sameDay` in lib/dates.ts), not from epoch arithmetic, so a 23- or 25-hour
+ * DST day is still exactly one day apart.
+ */
 const dayIndex = (d: Date): number =>
-  Math.floor((d.getTime() - d.getTimezoneOffset() * 60_000) / 86_400_000);
+  Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86_400_000;
 
 /**
  * The child's streak after finishing a session at `now`.
  * Kept dependency-free so `lib/streak.check.mjs` can run it under plain node.
  *
- * ponytail: device-local calendar days. A parent crossing timezones can keep or
- * gain a day; move to a server timestamp if that ever matters.
+ * ponytail: days are resolved against the device's *current* timezone, so a
+ * parent who flies across zones (or changes the device clock) shifts what
+ * "today" means and can keep or lose a day. Inherent to local calendar days;
+ * move to a server timestamp if that ever matters.
  */
 export function nextStreak(
   child: { streakCurrent: number; lastSessionAt?: Date },

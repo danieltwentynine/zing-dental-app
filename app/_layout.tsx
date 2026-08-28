@@ -15,6 +15,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect } from 'react';
 
 import { auth } from '@/lib/firebase';
+import { flushOutbox } from '@/lib/sessions';
 import { tokens } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -31,7 +32,12 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      // Sessions saved offline in an earlier run: retried once we know which
+      // parent is signed in, since the security rules are scoped to them.
+      if (user) void flushOutbox(user.uid);
+    });
     return unsubscribe;
   }, [setUser]);
 

@@ -16,7 +16,11 @@ export interface SessionResult {
   coachMessage: string;
 }
 
-export type SaveStatus = 'saving' | 'saved' | 'failed';
+export type SaveStatus = 'saving' | 'pending' | 'saved' | 'failed';
+
+/** How long the child is told we're saving before we admit we can't confirm it.
+ *  Offline, the Firestore write never settles at all — this is what ends the wait. */
+const PENDING_AFTER_MS = 4000;
 
 interface SessionState {
   lastResult: SessionResult | null;
@@ -62,32 +66,52 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     const id = saveId ?? newSessionId();
     inFlight = true;
     set({ saveId: id, saveStatus: 'saving' });
-    try {
-      // The moment brushing ended, not the moment this attempt runs — a retry
-      // must not move the session to a different day or streak.
-      const now = finishedAt ?? new Date();
-      const streak = nextStreak(child, now);
-      const zones = Object.entries(lastResult.zoneStates);
 
-      const ok = await saveSession({
-        id,
-        childId: child.id,
-        parentUid: user.uid,
-        completedAt: now,
-        durationSeconds: lastResult.durationSeconds,
-        zonesDetected: zones.filter(([, s]) => s === 'done').map(([zone]) => zone as ToothZone),
-        zonesCoverage: Object.fromEntries(zones.map(([zone, s]) => [zone, s === 'done' ? 100 : 0])),
-        score: lastResult.score,
-        coachMessage: lastResult.coachMessage,
-        streak,
-      });
+    // The moment brushing ended, not the moment this attempt runs — a retry
+    // must not move the session to a different day or streak.
+    const now = finishedAt ?? new Date();
+    const streak = nextStreak(child, now);
+    const zones = Object.entries(lastResult.zoneStates);
+
+    // Already durable in the outbox once this call is made; offline the promise
+    // below stays pending until the device is back online (possibly never, if the
+    // app is killed first — the next launch flushes it).
+    const write = saveSession({
+      id,
+      childId: child.id,
+      parentUid: user.uid,
+      completedAt: now,
+      durationSeconds: lastResult.durationSeconds,
+      zonesDetected: zones.filter(([, s]) => s === 'done').map(([zone]) => zone as ToothZone),
+      zonesCoverage: Object.fromEntries(zones.map(([zone, s]) => [zone, s === 'done' ? 100 : 0])),
+      score: lastResult.score,
+      coachMessage: lastResult.coachMessage,
+      streak,
+    });
+
+    // Whenever it confirms — now, or minutes later while the child is still on
+    // the results screen — finish the same way, unless a newer session took over.
+    void write.then(async (ok) => {
+      inFlight = false;
+      if (get().saveId !== id) return;
       set({ saveStatus: ok ? 'saved' : 'failed' });
       if (!ok) return;
 
-      const updated = await recordSession(child, streak, now);
+      const updated = await recordSession(child, { streakCurrent: streak, score: lastResult.score, now });
       if (updated) useChildStore.getState().setActiveChild(updated);
-    } finally {
+    });
+
+    const settled = await Promise.race([
+      write,
+      new Promise<'pending'>((resolve) => setTimeout(() => resolve('pending'), PENDING_AFTER_MS)),
+    ]);
+    if (settled === 'pending') {
+      // Offline the write never settles, so `.then` above would hold this flag
+      // forever and every later session would bail at the guard. Release it
+      // here: the only way back in is a NEW session, whose different saveId
+      // makes the stale continuation above bail instead of double-counting.
       inFlight = false;
+      if (get().saveId === id && get().saveStatus === 'saving') set({ saveStatus: 'pending' });
     }
   },
 }));

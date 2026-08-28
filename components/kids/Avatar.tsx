@@ -17,15 +17,17 @@ import { motion, palette, radius, shadows, tokens } from '@/lib/tokens';
 type AvatarConfig = { Icon: ComponentType<IconProps>; bg: string };
 
 // Phosphor has no Shark in RN; Fish is the closest friendly substitute.
+// Every bg clears 3:1 against white so the white fill icon stays legible, and
+// no two are within 30 CIELAB dE of each other — a child picks by color name.
 const AVATARS: Record<string, AvatarConfig> = {
-  shark: { Icon: Fish, bg: palette.sky[400] },
-  robot: { Icon: Robot, bg: palette.grape[500] },
-  rocket: { Icon: Rocket, bg: palette.coral[500] },
-  cat: { Icon: Cat, bg: palette.sunny[500] },
-  dog: { Icon: Dog, bg: palette.mint[500] },
-  butterfly: { Icon: Butterfly, bg: palette.sky[500] },
-  star: { Icon: Star, bg: palette.warning[500] },
-  heart: { Icon: Heart, bg: palette.coral[500] },
+  shark: { Icon: Fish, bg: palette.sky[600] },
+  robot: { Icon: Robot, bg: palette.ink[900] },
+  rocket: { Icon: Rocket, bg: palette.ink[500] },
+  cat: { Icon: Cat, bg: palette.warning[700] },
+  dog: { Icon: Dog, bg: palette.mint[700] },
+  butterfly: { Icon: Butterfly, bg: palette.grape[700] },
+  star: { Icon: Star, bg: palette.sunny[700] },
+  heart: { Icon: Heart, bg: palette.coral[700] },
 };
 
 export const AVATAR_IDS = Object.keys(AVATARS);

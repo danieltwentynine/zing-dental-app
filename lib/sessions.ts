@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Timestamp,
   collection,
@@ -12,6 +13,7 @@ import { z } from 'zod';
 
 import type { ToothZone } from '@/types';
 import { db, timestampToDate } from '@/lib/firebase';
+import { OUTBOX_KEY, decodeOutbox, encodeOutbox, type PendingSession } from '@/lib/outbox';
 
 export interface SavedSessionInput {
   id: string;
@@ -44,26 +46,96 @@ export function newSessionId(): string {
   return doc(collection(db, 'sessions')).id;
 }
 
-/** Persist a finished session — idempotent in `input.id`, never throws to the child UI. */
-export async function saveSession(input: SavedSessionInput): Promise<boolean> {
+/** The outbox entry is the wire format: one JSON-safe copy of the session doc. */
+const toEntry = (input: SavedSessionInput): PendingSession => ({
+  ...input,
+  completedAt: input.completedAt.toISOString(),
+});
+
+async function readOutbox(): Promise<PendingSession[]> {
   try {
-    await setDoc(doc(db, 'sessions', input.id), {
-      childId: input.childId,
-      parentUid: input.parentUid,
+    return decodeOutbox(await AsyncStorage.getItem(OUTBOX_KEY));
+  } catch {
+    return [];
+  }
+}
+
+// ponytail: read-modify-write with no lock. Entries are keyed by a stable session
+// id and the Firestore write is idempotent, so the worst a lost race costs is one
+// redundant retry on the next launch. Add a mutex only if writes ever fan out.
+async function putEntry(entry: PendingSession): Promise<void> {
+  try {
+    const others = (await readOutbox()).filter((e) => e.id !== entry.id);
+    await AsyncStorage.setItem(OUTBOX_KEY, encodeOutbox([...others, entry]));
+  } catch {
+    // Storage full or unavailable: the Firestore write still goes ahead.
+  }
+}
+
+async function dropEntry(id: string): Promise<void> {
+  try {
+    const others = (await readOutbox()).filter((e) => e.id !== id);
+    if (others.length === 0) await AsyncStorage.removeItem(OUTBOX_KEY);
+    else await AsyncStorage.setItem(OUTBOX_KEY, encodeOutbox(others));
+  } catch {
+    // Leftovers are retried on the next launch; nothing is lost by failing here.
+  }
+}
+
+async function writeEntry(entry: PendingSession): Promise<boolean> {
+  const completedAt = new Date(entry.completedAt);
+  try {
+    await setDoc(doc(db, 'sessions', entry.id), {
+      childId: entry.childId,
+      parentUid: entry.parentUid,
       startedAt: Timestamp.fromDate(
-        new Date(input.completedAt.getTime() - input.durationSeconds * 1000),
+        new Date(completedAt.getTime() - entry.durationSeconds * 1000),
       ),
-      completedAt: Timestamp.fromDate(input.completedAt),
-      durationSeconds: input.durationSeconds,
-      zonesDetected: input.zonesDetected,
-      zonesCoverage: input.zonesCoverage,
-      score: input.score,
-      coachMessage: input.coachMessage,
-      streak: input.streak,
+      completedAt: Timestamp.fromDate(completedAt),
+      durationSeconds: entry.durationSeconds,
+      zonesDetected: entry.zonesDetected,
+      zonesCoverage: entry.zonesCoverage,
+      score: entry.score,
+      coachMessage: entry.coachMessage,
+      streak: entry.streak,
     });
     return true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Persist a finished session — idempotent in `input.id`, never throws to the child UI.
+ *
+ * The session lands in the on-device outbox *before* the network attempt, so it
+ * survives the app being killed while offline. Firestore confirming the write is
+ * what removes it. Offline the returned promise stays pending indefinitely (the
+ * SDK parks the mutation in an in-memory queue and never rejects), so callers
+ * must not make the child wait on it — see `saveLastResult`.
+ */
+export async function saveSession(input: SavedSessionInput): Promise<boolean> {
+  const entry = toEntry(input);
+  await putEntry(entry);
+  const ok = await writeEntry(entry);
+  if (ok) await dropEntry(entry.id);
+  return ok;
+}
+
+let flushed = false;
+
+/**
+ * Retry sessions a previous run left unconfirmed. Once per launch, and only for
+ * the signed-in parent (the security rules reject anyone else's). Sequential on
+ * purpose: while offline the first write simply never settles, and the rest wait
+ * with it until connectivity returns.
+ */
+export async function flushOutbox(parentUid: string): Promise<void> {
+  if (flushed) return;
+  flushed = true;
+  for (const entry of await readOutbox()) {
+    if (entry.parentUid !== parentUid) continue;
+    if (await writeEntry(entry)) await dropEntry(entry.id);
   }
 }
 

@@ -65,13 +65,23 @@ export default function ResultsScreen() {
         <CoachCard score={result.score} message={result.coachMessage} style={{ width: '100%' }} />
 
         {/* Save state, in the child's language — never an error message, and it
-            never blocks the buttons below (offline, "saving" is the resting state). */}
+            never blocks the buttons below. "Saving" only lasts a few seconds: the
+            store flips to 'pending' rather than spinning forever while offline. */}
         {saveStatus === 'saving' ? (
           <Text
             className="font-bodySemibold"
             style={{ fontSize: 13, color: tokens.textTertiary, marginTop: 14 }}
           >
             Saving your session…
+          </Text>
+        ) : null}
+
+        {saveStatus === 'pending' ? (
+          <Text
+            className="font-bodySemibold"
+            style={{ fontSize: 13, color: tokens.textTertiary, marginTop: 14, textAlign: 'center' }}
+          >
+            Kept safe on this phone — it joins your progress when you're back online.
           </Text>
         ) : null}
 
