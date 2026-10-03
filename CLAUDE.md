@@ -291,6 +291,12 @@ IDLE → COUNTDOWN (3s) → ACTIVE → PAUSED → COMPLETED → RESULTS
 
 ---
 
+## Project knowledge (read before changing an area)
+
+Progress lives in `docs/ROADMAP.md`, decisions in `docs/decisions/`, copy rules in `docs/CLINICAL.md`, checks and releases in `docs/RUNBOOK.md`. Skills in `.claude/skills/`; the `privacy-reviewer` agent in `.claude/agents/` should review diffs touching Firestore, auth, logging, camera, or Gemini. If these docs and the code disagree, fix or flag the stale one.
+
+---
+
 ## Current Phase: Phase 1 — Foundation
 
 **What to build now (in order):**
