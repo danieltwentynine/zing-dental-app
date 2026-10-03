@@ -10,7 +10,7 @@ TZ=America/New_York node lib/streak.check.mjs   # exercises the DST boundary cas
 There is no unit-test framework or linter by design for now (see `lib/streak.check.mjs`). New pure logic goes in `lib/` with a sibling `*.check.mjs`.
 
 ## Expo version
-`package.json` is the authority (currently `expo ~57`). `CLAUDE.md` and `AGENTS.md` still mention SDK 56 — reconcile them. Before using any Expo API, read the docs for the **installed** SDK version.
+`package.json` is the authority (currently SDK 57). Before using any Expo API, read the docs for the **installed** SDK version (see `AGENTS.md`). Upgrade by SDK, not by package: `npx expo install expo@latest --fix`, then the checks above and `npx expo export --platform ios --output-dir <tmp>`. Stay on the SDK-pinned versions of react, react-native, reanimated, screens, etc.; don't bump them individually.
 
 ## Local run
 ```bash
