@@ -25,8 +25,8 @@ Zing is an iOS-first mobile app that uses the phone camera to coach children thr
 | Language | TypeScript (strict mode) | Required everywhere, no `any` |
 | Navigation | Expo Router (file-based) | App directory structure |
 | Backend | Firebase JS SDK v12 (Firestore + Auth + Storage) | Free tier sufficient for MVP |
-| Camera | Expo Camera (face detection approach TBD — `expo-face-detector` was removed from Expo SDK; evaluate react-native-vision-camera or MediaPipe in Phase 2) | Live frame processing |
-| AI Model (camera) | MediaPipe via react-native-mediapipe | Brush zone detection, on-device |
+| Camera | react-native-vision-camera v5 (per ADR 0002; needs a development build) | Per-frame processing for live detection |
+| AI Model (camera) | TBD — Phase 2 spike decides (ADR 0002). `react-native-mediapipe` is unproven here | Brush zone detection, on-device |
 | AI Coach (text) | Google Gemini Flash API (verify current model name before Phase 2 — the 1.5 series is being retired) | Free tier |
 | Subscriptions | RevenueCat | Free until $2,500 MRR |
 | Styling | NativeWind (Tailwind for RN) | Consistent design system |
