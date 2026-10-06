@@ -9,7 +9,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.zingdentalai.zing"
+      "bundleIdentifier": "com.zingdentalai.zing",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Zing uses the front camera during brushing to see your mouth. The picture stays on this phone and is never saved or sent anywhere."
+      }
     },
     "android": {
       "adaptiveIcon": {
