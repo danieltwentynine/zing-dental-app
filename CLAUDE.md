@@ -21,7 +21,7 @@ Zing is an iOS-first mobile app that uses the phone camera to coach children thr
 
 | Layer | Technology | Why |
 |---|---|---|
-| Framework | React Native + Expo SDK 56 | iOS-first, Android later, single codebase |
+| Framework | React Native + Expo SDK 57 | iOS-first, Android later, single codebase |
 | Language | TypeScript (strict mode) | Required everywhere, no `any` |
 | Navigation | Expo Router (file-based) | App directory structure |
 | Backend | Firebase JS SDK v12 (Firestore + Auth + Storage) | Free tier sufficient for MVP |
@@ -291,6 +291,12 @@ IDLE → COUNTDOWN (3s) → ACTIVE → PAUSED → COMPLETED → RESULTS
 
 ---
 
+## Project knowledge (read before changing an area)
+
+Progress lives in `docs/ROADMAP.md`, decisions in `docs/decisions/`, copy rules in `docs/CLINICAL.md`, checks and releases in `docs/RUNBOOK.md`. Skills in `.claude/skills/`; the `privacy-reviewer` agent in `.claude/agents/` should review diffs touching Firestore, auth, logging, camera, or Gemini. If these docs and the code disagree, fix or flag the stale one.
+
+---
+
 ## Current Phase: Phase 1 — Foundation
 
 **What to build now (in order):**
@@ -331,7 +337,7 @@ All accessed via `process.env.EXPO_PUBLIC_*` — the `EXPO_PUBLIC_` prefix makes
 
 ## Commands
 
-The project is already bootstrapped (Expo SDK 56, blank TypeScript template) with all Phase 1 dependencies installed.
+The project is already bootstrapped (Expo SDK 57, blank TypeScript template) with all Phase 1 dependencies installed.
 
 ```bash
 npx expo start          # Start Metro dev server (press i for iOS simulator)
