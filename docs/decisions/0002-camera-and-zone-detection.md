@@ -1,6 +1,6 @@
 # 0002. Camera and brush-zone detection approach (Phase 2)
 
-- Status: Proposed — needs owner review; the detection layer also needs a spike (see below)
+- Status: Accepted (2026-10-06) for the camera layer and the spike-first approach. The detection layer is still undecided until the spike finishes.
 - Date: 2026-10-06
 
 ## Context

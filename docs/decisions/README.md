@@ -5,4 +5,4 @@ One short file per non-obvious decision: `NNNN-kebab-title.md`, copied from [000
 | # | Decision | Status |
 |---|---|---|
 | 0001 | [Record decisions as ADRs](0001-record-decisions.md) | Accepted |
-| 0002 | [Camera and brush-zone detection approach](0002-camera-and-zone-detection.md) | Proposed |
+| 0002 | [Camera and brush-zone detection approach](0002-camera-and-zone-detection.md) | Accepted (detection layer pending spike) |
