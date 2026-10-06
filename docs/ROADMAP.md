@@ -21,7 +21,7 @@ Status confirmed by the owner on 2026-10-06 (previously inferred from the repo: 
 - [ ] Portuguese (BR) strings — launch target is PT-BR + English; no i18n layer yet
 
 ## Phase 2 — Camera and AI (not started)
-- [ ] Decide face/mouth detection approach (ADR needed: vision-camera vs MediaPipe)
+- [ ] Decide face/mouth detection approach — see [ADR 0002](decisions/0002-camera-and-zone-detection.md) (Proposed; needs a spike)
 - [ ] `MouthMap` live overlay
 - [ ] Gemini coach in `lib/coach.ts` with the local generator as fallback. Verify the current model name first; the 1.5 series is being retired
 - [ ] Clinical advisor review of all coach templates
