@@ -9,6 +9,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrushTimer } from '@/components/brushing/BrushTimer';
 import { MouthMap, type ZoneState } from '@/components/brushing/MouthMap';
 import { buildCoachMessage } from '@/lib/coach';
+import { generateCoachMessage } from '@/lib/gemini';
+import { nextStreak } from '@/lib/streak';
 import { ALL_TOOTH_ZONES, BRUSHING_DURATION_SECONDS, COUNTDOWN_SECONDS } from '@/lib/constants';
 import { tokens } from '@/lib/tokens';
 import { useChildStore } from '@/stores/childStore';
@@ -67,7 +69,7 @@ export default function SessionScreen() {
     return () => clearTimeout(t);
   }, [phase, count]);
 
-  const finish = useCallback(() => {
+  const finish = useCallback(async () => {
     if (finishedRef.current) return;
     finishedRef.current = true;
 
@@ -90,7 +92,17 @@ export default function SessionScreen() {
     });
 
     const score = Math.round((reached / ALL_TOOTH_ZONES.length) * 100);
-    const coachMessage = buildCoachMessage(child?.name ?? 'friend', missed, score);
+    const name = child?.name ?? 'friend';
+    // Gemini has its own short timeout; any failure keeps the local message.
+    const coachMessage =
+      (child &&
+        (await generateCoachMessage(name, {
+          age: child.age,
+          missedZones: missed,
+          score,
+          streakDays: nextStreak(child, new Date()),
+        }))) ||
+      buildCoachMessage(name, missed, score);
 
     setLastResult({
       score,
@@ -117,7 +129,7 @@ export default function SessionScreen() {
       setRemaining(Math.max(0, next));
       if (next <= 0) {
         clearInterval(interval);
-        finish();
+        void finish();
       }
     }, 1000);
     return () => clearInterval(interval);
@@ -195,7 +207,7 @@ export default function SessionScreen() {
             </View>
 
             <Pressable
-              onPress={finish}
+              onPress={() => void finish()}
               style={{
                 backgroundColor: 'rgba(255,255,255,0.15)',
                 paddingHorizontal: 28,

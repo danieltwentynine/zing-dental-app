@@ -1,7 +1,7 @@
 # Zing — AI Dental Coach for Kids
 > Single source of truth for every coding agent in this repo (Claude Code, Codex, etc.). `AGENTS.md` only points here — edit this file, never duplicate its content elsewhere. Read this entire file before making any change.
 
-**Expo has changed.** Before writing Expo code, read the versioned docs at https://docs.expo.dev/versions/v56.0.0/ — don't rely on memory of older SDKs.
+**Expo has changed.** Before writing Expo code, read the versioned docs at https://docs.expo.dev/versions/v57.0.0/ — don't rely on memory of older SDKs.
 
 ## What is Zing?
 
@@ -62,14 +62,15 @@ lib/
 ├── children.ts, sessions.ts      # Firestore reads/writes
 ├── outbox.ts                     # Offline queue so finished sessions are never lost
 ├── streak.ts, badges.ts, dates.ts
-├── coach.ts                      # LOCAL coach message generator (Gemini not wired yet)
+├── coach.ts                      # Local coach message — fallback when Gemini fails
+├── gemini.ts                     # Gemini Flash client + prompt/sanitizer
 ├── constants.ts, tokens.ts       # Zone map, timing; design tokens
 └── *.check.mjs                   # Plain-node self-checks (see Commands)
 stores/ authStore.ts, childStore.ts, sessionStore.ts   # Zustand
 types/ index.ts                   # All shared types; firebase-auth.d.ts augments RN persistence
 ```
 
-Not built yet: `lib/gemini.ts`, `useBrushingSession`, `useZoneDetection`, `useCoachMessage`, `ZoneAlert`, `assets/characters|sounds` (Phase 2+).
+Not built yet: `useBrushingSession`, `useZoneDetection`, `useCoachMessage`, `ZoneAlert`, `assets/characters|sounds` (Phase 2+).
 
 ---
 
@@ -152,39 +153,15 @@ interface Badge {
 
 ---
 
-## Gemini Coach Integration (Phase 2 target — NOT implemented)
+## Gemini Coach Integration (implemented in `lib/gemini.ts`)
 
-> Today the coach message comes from `lib/coach.ts` (local, offline). The code below is the planned design; when built, keep `lib/coach.ts` as the fallback.
-
-```typescript
-// lib/gemini.ts — the only place Gemini is called
-
-const GEMINI_ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
-
-export async function generateCoachMessage(
-  childName: string,
-  age: number,
-  missedZones: ToothZone[],
-  score: number,
-  streakDays: number
-): Promise<string> {
-  const prompt = buildCoachPrompt(childName, age, missedZones, score, streakDays);
-  // Call GEMINI_ENDPOINT with prompt
-  // Return a single string: max 2 sentences, child-friendly, encouraging tone
-  // Never mention brand names, medical advice, or specific dental conditions
-}
-
-function buildCoachPrompt(...): string {
-  // Build a prompt that:
-  // 1. Mentions the child by name
-  // 2. Calls out up to 2 missed zones max (don't overwhelm)
-  // 3. Acknowledges the streak if > 2 days
-  // 4. Uses fun analogies (sharks, robots, superheroes) for ages 4-7
-  // 5. Is slightly more mature for ages 8-12
-  // Never return clinical language
-}
-```
+- Model `gemini-3.5-flash-lite` (constant `GEMINI_MODEL` — re-check https://ai.google.dev/gemini-api/docs/deprecations before each release).
+- `generateCoachMessage(childName, { age, missedZones, score, streakDays, locale })` returns a sanitized message or `null`. It is the only place Gemini is called.
+- **The child's name never leaves the device**: the prompt uses the token `{NAME}`, substituted locally after the reply. Only age, up to 2 missed zones, score and streak are sent.
+- Replies are rejected (→ fallback) if empty, over 300 chars, or containing clinical/brand wording (`BANNED` regex — clinical advisor owns this list). Capped at 2 sentences.
+- `app/session.tsx` awaits it (4 s timeout) in `finish()`; on `null` it uses `lib/coach.ts`. Never show an error to the child.
+- Self-check: `node lib/gemini.check.mjs`.
+- Known gap: `EXPO_PUBLIC_GEMINI_API_KEY` ships in the bundle. Before App Store, proxy via a Firebase Function + App Check.
 
 **Fallback:** If Gemini API fails or is rate-limited, use the local message bank in `lib/constants.ts`. Never show an error to the child.
 
@@ -328,7 +305,7 @@ npx expo export --platform ios --output-dir dist-check   # Full bundle check (de
 npx expo install <pkg>  # Always use this (not npm install) for Expo/RN native packages — it picks SDK-compatible versions
 ```
 
-Self-checks (plain node + assert, no framework): `node lib/streak.check.mjs`, `node lib/badges.check.mjs`, `node lib/outbox.check.mjs`. Add one next to any new non-trivial pure logic. Run streak under a DST zone too: `TZ=America/New_York node lib/streak.check.mjs`.
+Self-checks (plain node + assert, no framework): `node lib/streak.check.mjs`, `node lib/badges.check.mjs`, `node lib/outbox.check.mjs`, `node lib/gemini.check.mjs`. Add one next to any new non-trivial pure logic. Run streak under a DST zone too: `TZ=America/New_York node lib/streak.check.mjs`.
 
 There is no linter configured. `tsc --noEmit` plus the self-checks are the gates.
 
