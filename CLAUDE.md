@@ -1,5 +1,7 @@
 # Zing — AI Dental Coach for Kids
-> Claude Code project context. Read this entire file before making any change.
+> Single source of truth for every coding agent in this repo (Claude Code, Codex, etc.). `AGENTS.md` only points here — edit this file, never duplicate its content elsewhere. Read this entire file before making any change.
+
+**Expo has changed.** Before writing Expo code, read the versioned docs at https://docs.expo.dev/versions/v56.0.0/ — don't rely on memory of older SDKs.
 
 ## What is Zing?
 
@@ -38,54 +40,36 @@ Zing is an iOS-first mobile app that uses the phone camera to coach children thr
 
 ## Project Structure
 
+Actual layout (the repo root is the project; ignore any older `fable/` naming):
+
 ```
-fable/
-├── app/                          # Expo Router screens
-│   ├── (auth)/
-│   │   ├── login.tsx
-│   │   └── register.tsx
-│   ├── (tabs)/
-│   │   ├── _layout.tsx
-│   │   ├── home.tsx              # Dashboard for parent/child
-│   │   ├── brush.tsx             # Main brushing session screen
-│   │   └── progress.tsx          # History and achievements
-│   ├── onboarding/
-│   │   ├── welcome.tsx
-│   │   └── child-setup.tsx
-│   └── _layout.tsx
-├── components/
-│   ├── brushing/
-│   │   ├── MouthMap.tsx          # Live zone overlay SVG
-│   │   ├── BrushTimer.tsx        # 2-minute countdown
-│   │   ├── ZoneAlert.tsx         # "Don't forget your top teeth!"
-│   │   └── CoachMessage.tsx      # Post-session AI feedback
-│   ├── kids/
-│   │   ├── AvatarPicker.tsx
-│   │   ├── BadgeCard.tsx
-│   │   └── StreakDisplay.tsx
-│   └── ui/
-│       ├── Button.tsx
-│       ├── Card.tsx
-│       └── SafeScreen.tsx
-├── hooks/
-│   ├── useBrushingSession.ts     # Core session state machine
-│   ├── useZoneDetection.ts       # Camera frame → zone logic
-│   └── useCoachMessage.ts        # Gemini API call
-├── lib/
-│   ├── firebase.ts               # Firebase init
-│   ├── gemini.ts                 # Gemini Flash client
-│   └── constants.ts              # Zone map, timing, thresholds
-├── stores/
-│   ├── authStore.ts              # Zustand auth state
-│   ├── sessionStore.ts           # Current brushing session
-│   └── childStore.ts             # Active child profile
-├── types/
-│   └── index.ts                  # All shared TypeScript types
-├── assets/
-│   ├── characters/               # Zing mascot sprites
-│   └── sounds/                   # Brushing timer sounds
-└── CLAUDE.md                     # This file
+app/                              # Expo Router screens
+├── _layout.tsx                   # Fonts, auth subscription, outbox flush
+├── index.tsx                     # Redirect: signed in → (tabs)/home, else onboarding/welcome
+├── (auth)/ login.tsx, register.tsx
+├── (tabs)/ home.tsx, progress.tsx
+├── onboarding/ welcome.tsx, child-setup.tsx
+├── session.tsx                   # Brushing session (replaces the planned (tabs)/brush.tsx)
+└── results.tsx                   # Score, coach message, save status
+components/
+├── brand/ZingBrand.tsx
+├── brushing/ MouthMap.tsx, BrushTimer.tsx, CoachCard.tsx
+├── kids/ Avatar.tsx, BadgeCard.tsx, StreakDisplay.tsx
+└── ui/ Badge, Button, Card, Chip, Input, SafeScreen, SectionTitle
+hooks/useActiveChild.ts
+lib/
+├── firebase.ts, socialAuth.ts    # Firebase init, Google Sign-In
+├── children.ts, sessions.ts      # Firestore reads/writes
+├── outbox.ts                     # Offline queue so finished sessions are never lost
+├── streak.ts, badges.ts, dates.ts
+├── coach.ts                      # LOCAL coach message generator (Gemini not wired yet)
+├── constants.ts, tokens.ts       # Zone map, timing; design tokens
+└── *.check.mjs                   # Plain-node self-checks (see Commands)
+stores/ authStore.ts, childStore.ts, sessionStore.ts   # Zustand
+types/ index.ts                   # All shared types; firebase-auth.d.ts augments RN persistence
 ```
+
+Not built yet: `lib/gemini.ts`, `useBrushingSession`, `useZoneDetection`, `useCoachMessage`, `ZoneAlert`, `assets/characters|sounds` (Phase 2+).
 
 ---
 
@@ -168,7 +152,9 @@ interface Badge {
 
 ---
 
-## Gemini Coach Integration
+## Gemini Coach Integration (Phase 2 target — NOT implemented)
+
+> Today the coach message comes from `lib/coach.ts` (local, offline). The code below is the planned design; when built, keep `lib/coach.ts` as the fallback.
 
 ```typescript
 // lib/gemini.ts — the only place Gemini is called
@@ -218,7 +204,9 @@ This is the most important UI component. It is an SVG overlay displayed on top o
 
 ---
 
-## Brushing Session State Machine
+## Brushing Session State Machine (target design)
+
+> Current implementation: `app/session.tsx` drives the timer and `stores/sessionStore.ts` holds the result and save status (`saving | pending | saved | failed`, with outbox retry). The formal IDLE→…→RESULTS machine below is not extracted into a hook yet.
 
 The session has these states. Use a Zustand store + useReducer pattern:
 
@@ -297,17 +285,11 @@ Progress lives in `docs/ROADMAP.md`, decisions in `docs/decisions/`, copy rules 
 
 ---
 
-## Current Phase: Phase 1 — Foundation
+## Current Phase: Phase 1 — Foundation (code complete, pending end-to-end simulator pass)
 
-**What to build now (in order):**
+All seven Phase 1 items have code in the repo (register, login incl. Google Sign-In, child-setup, home, BrushTimer, session + results with Firestore save and offline outbox, progress). Streaks and badges are implemented. Item 6 landed as `app/session.tsx` + `app/results.tsx` rather than `(tabs)/brush.tsx`.
 
-1. ~~`app/(auth)/register.tsx` — parent registration with email/password via Firebase Auth~~ ✅ Done
-2. `app/(auth)/login.tsx` — login screen (placeholder exists, needs the real form)
-3. `app/onboarding/child-setup.tsx` — add first child profile (name, age, avatar picker)
-4. `app/(tabs)/home.tsx` — parent dashboard showing child profile + today's brushing status
-5. `components/brushing/BrushTimer.tsx` — standalone 2-minute timer with quadrant guide (no camera yet)
-6. `app/(tabs)/brush.tsx` — brushing session screen using BrushTimer, save completed session to Firestore
-7. `app/(tabs)/progress.tsx` — session history list with scores
+**Next:** run the full flow in the simulator (register → child setup → session → results → progress), fix what breaks, then start Phase 2.
 
 **What NOT to build yet:**
 - Camera integration (Phase 2)
@@ -346,7 +328,13 @@ npx expo export --platform ios --output-dir dist-check   # Full bundle check (de
 npx expo install <pkg>  # Always use this (not npm install) for Expo/RN native packages — it picks SDK-compatible versions
 ```
 
-There is no linter configured yet. The TypeScript compiler in strict mode is the only gate.
+Self-checks (plain node + assert, no framework): `node lib/streak.check.mjs`, `node lib/badges.check.mjs`, `node lib/outbox.check.mjs`. Add one next to any new non-trivial pure logic. Run streak under a DST zone too: `TZ=America/New_York node lib/streak.check.mjs`.
+
+There is no linter configured. `tsc --noEmit` plus the self-checks are the gates.
+
+**Simulator:** this is a dev-client project — use `npx expo run:ios`, never `expo start --ios` or `--go` (Expo Go can't load the native modules).
+
+**`.npmrc` / install scripts:** `package.json` `allowScripts` is the authority for postinstall scripts. Don't set `allow-scripts=true` in `.npmrc`; add allowances to `allowScripts`.
 
 ## Implementation Notes (learned during setup)
 
@@ -355,7 +343,10 @@ There is no linter configured yet. The TypeScript compiler in strict mode is the
 - NativeWind v4 is wired through `babel.config.js` (`jsxImportSource: 'nativewind'` + `nativewind/babel`), `metro.config.js` (`withNativeWind` with `global.css`), and `tailwind.config.js` (design-system colors and font families as Tailwind tokens: `primary`, `ink`, `muted`, `font-display`, `font-body`, etc.).
 - Firebase Auth uses `initializeAuth` + `getReactNativePersistence(AsyncStorage)` in `lib/firebase.ts`. The firebase v12 wrapper's web typings omit `getReactNativePersistence` (it exists in the RN runtime build) — `types/firebase-auth.d.ts` augments the module; do not work around it with `@ts-ignore`.
 - Fonts are loaded once in `app/_layout.tsx` via `@expo-google-fonts/*` packages and referenced by PostScript name in Tailwind: `font-display` → `Baloo2_800ExtraBold`, `font-subhead` → `Baloo2_700Bold`, `font-body` → `Baloo2_500Medium`, `font-bodySemibold` → `Baloo2_600SemiBold`, `font-numeric` → `SpaceGrotesk_700Bold`. `Nunito_800ExtraBold` stays loaded solely for the SVG wordmark in `ZingBrand.tsx`.
-- Auth state flows: `onAuthStateChanged` subscription in `app/_layout.tsx` → `stores/authStore.ts` (Zustand) → `app/index.tsx` redirects to `(auth)/register` or `onboarding/child-setup`.
+- Auth state flows: `onAuthStateChanged` subscription in `app/_layout.tsx` → `stores/authStore.ts` (Zustand) → `app/index.tsx` redirects to `(tabs)/home` when signed in, else `onboarding/welcome`.
+- NativeWind 4.2.5 drops function-form `Pressable` styles (upstream #1105); `Button.tsx` uses a pressed-state workaround — don't revert it.
+- Fabric: don't make style *keys* conditional on focus (it recreates the native view and drops `TextInput` focus). Keep the keys, change the values.
+- Finished sessions go through `lib/outbox.ts` so an offline write is retried, not lost. Session docs are idempotent via a stable id; `totalSessions` is an increment, guarded by `inFlight` in `sessionStore`.
 
 ---
 

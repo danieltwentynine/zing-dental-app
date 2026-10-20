@@ -28,6 +28,8 @@ yarn-error.*
 .DS_Store
 *.pem
 
+.npmrc
+
 # env files (real keys live here — never commit)
 .env
 .env.*
