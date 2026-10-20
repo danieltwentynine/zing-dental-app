@@ -5,7 +5,10 @@ import { Sparkle, X } from 'phosphor-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCameraPermission } from 'react-native-vision-camera';
 
+import { CameraBackdrop } from '@/components/brushing/CameraBackdrop';
+import { CameraGate } from '@/components/brushing/CameraGate';
 import { BrushTimer } from '@/components/brushing/BrushTimer';
 import { MouthMap, type ZoneState } from '@/components/brushing/MouthMap';
 import { buildCoachMessage } from '@/lib/coach';
@@ -35,6 +38,12 @@ export default function SessionScreen() {
   const setLastResult = useSessionStore((s) => s.setLastResult);
   const saveLastResult = useSessionStore((s) => s.saveLastResult);
 
+  const camera = useCameraPermission();
+  const [skipCamera, setSkipCamera] = useState(false);
+  // Ask once (with an explainer first); denied or skipped just means guided mode.
+  const askingForCamera = camera.canRequestPermission && !skipCamera;
+  const cameraOn = camera.hasPermission && !skipCamera;
+
   const [phase, setPhase] = useState<'countdown' | 'active'>('countdown');
   const [count, setCount] = useState(COUNTDOWN_SECONDS);
   const [remaining, setRemaining] = useState(BRUSHING_DURATION_SECONDS);
@@ -60,14 +69,14 @@ export default function SessionScreen() {
 
   // Countdown 3 → 2 → 1 → Go!
   useEffect(() => {
-    if (phase !== 'countdown') return;
+    if (phase !== 'countdown' || askingForCamera) return;
     if (count < 0) {
       setPhase('active');
       return;
     }
     const t = setTimeout(() => setCount((c) => c - 1), 800);
     return () => clearTimeout(t);
-  }, [phase, count]);
+  }, [phase, count, askingForCamera]);
 
   const finish = useCallback(async () => {
     if (finishedRef.current) return;
@@ -140,6 +149,7 @@ export default function SessionScreen() {
   return (
     <LinearGradient colors={['#0b3b3a', '#051c20']} style={{ flex: 1 }}>
       <StatusBar style="light" />
+      {cameraOn ? <CameraBackdrop /> : null}
       <SafeAreaView style={{ flex: 1 }}>
         <Pressable
           accessibilityRole="button"
@@ -161,7 +171,9 @@ export default function SessionScreen() {
           <X size={20} color="#fff" weight="bold" />
         </Pressable>
 
-        {phase === 'countdown' ? (
+        {askingForCamera ? (
+          <CameraGate onAllow={() => void camera.requestPermission()} onSkip={() => setSkipCamera(true)} />
+        ) : phase === 'countdown' ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', rowGap: 10 }}>
             <Text className="font-numeric" style={{ fontSize: 140, color: '#fff', lineHeight: 150 }}>
               {count <= 0 ? 'Go!' : count}
