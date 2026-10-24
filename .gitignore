@@ -4,6 +4,7 @@ node_modules/
 # Expo
 .expo/
 dist/
+dist-check/
 web-build/
 expo-env.d.ts
 
@@ -15,6 +16,17 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+
+# Build artifacts (EAS --local)
+*.ipa
+*.apk
+*.aab
+
+# Firebase CLI
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
 # Metro
 .metro-health-check*
