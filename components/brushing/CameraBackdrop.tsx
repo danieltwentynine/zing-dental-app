@@ -9,7 +9,7 @@ import { Camera } from 'react-native-vision-camera';
 export function CameraBackdrop() {
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <Camera style={StyleSheet.absoluteFill} device="front" isActive resizeMode="cover" />
+      <Camera style={StyleSheet.absoluteFill} device="front" isActive resizeMode="cover" orientationSource="interface" />
       <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(5,28,32,0.55)' }]} />
     </View>
   );
