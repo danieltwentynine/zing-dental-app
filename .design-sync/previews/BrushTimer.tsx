@@ -4,7 +4,7 @@ const row = { display: 'flex', gap: 24, alignItems: 'center' } as const;
 
 export const Start = () => <BrushTimer remaining={120} total={120} size={240} />;
 
-export const MidSession = () => <BrushTimer remaining={47} total={120} size={240} label="Top teeth" />;
+export const MidSession = () => <BrushTimer remaining={47} total={120} size={240} />;
 
 export const Compact = () => (
   <div style={row}>

@@ -6,7 +6,6 @@ import { hardShadow, outline, palette, radius, tokens } from '@/lib/tokens';
 interface CoachCardProps {
   message: string;
   score?: number | null;
-  title?: string;
   style?: ViewStyle;
 }
 
@@ -14,7 +13,7 @@ interface CoachCardProps {
  * CoachCard — the post-session coaching message from Sparky. Warm, playful,
  * never clinical (CLAUDE.md > Gemini Coach). Optional score chip.
  */
-export function CoachCard({ message, score = null, title = 'Sparky says', style }: CoachCardProps) {
+export function CoachCard({ message, score = null, style }: CoachCardProps) {
   return (
     <View
       style={[
@@ -34,7 +33,7 @@ export function CoachCard({ message, score = null, title = 'Sparky says', style 
       <View style={{ flex: 1, rowGap: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
           <Text className="font-display" style={{ fontSize: 17, color: palette.cobalt[700] }}>
-            {title}
+            Sparky says
           </Text>
           {score != null ? (
             <View

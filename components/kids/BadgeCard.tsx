@@ -17,14 +17,12 @@ const BADGE_META: Record<BadgeType, { Icon: ComponentType<IconProps>; color: str
 
 interface BadgeCardProps {
   type?: BadgeType;
-  name?: string;
   earned?: boolean;
-  caption?: string;
   style?: ViewStyle;
 }
 
 /** BadgeCard — a kid's achievement reward. Earned = full color + toy outline; locked = dashed + greyed. */
-export function BadgeCard({ type = 'firstSession', name, earned = true, caption = '', style }: BadgeCardProps) {
+export function BadgeCard({ type = 'firstSession', earned = true, style }: BadgeCardProps) {
   const meta = BADGE_META[type];
   return (
     <View
@@ -62,16 +60,9 @@ export function BadgeCard({ type = 'firstSession', name, earned = true, caption 
           <LockSimple size={34} color={palette.ink[400]} weight="bold" />
         )}
       </View>
-      <View style={{ alignItems: 'center', rowGap: 2 }}>
-        <Text className="font-display-semi" style={{ fontSize: 15, color: tokens.textPrimary, textAlign: 'center' }}>
-          {name ?? meta.label}
-        </Text>
-        {caption ? (
-          <Text className="font-body" style={{ fontSize: 13, color: tokens.textSecondary }}>
-            {caption}
-          </Text>
-        ) : null}
-      </View>
+      <Text className="font-display-semi" style={{ fontSize: 15, color: tokens.textPrimary, textAlign: 'center' }}>
+        {meta.label}
+      </Text>
     </View>
   );
 }

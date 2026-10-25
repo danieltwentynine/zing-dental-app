@@ -15,7 +15,7 @@ import { z } from 'zod';
 import type { Badge, ChildProfile } from '@/types';
 import { daysBrushedThisWeek, newBadges } from '@/lib/badges';
 import { db, timestampToDate } from '@/lib/firebase';
-import { fetchRecentSessions, type RecentSession } from '@/lib/sessions';
+import { fetchRecentSessions } from '@/lib/sessions';
 
 const badgeSchema = z.object({
   id: z.string(),
@@ -45,29 +45,9 @@ export interface NewChildInput {
 }
 
 export async function createChild(parentUid: string, input: NewChildInput): Promise<ChildProfile> {
-  const ref = await addDoc(collection(db, 'children'), {
-    parentUid,
-    name: input.name,
-    age: input.age,
-    avatarId: input.avatarId,
-    streakCurrent: 0,
-    streakBest: 0,
-    totalSessions: 0,
-    badges: [] as Badge[],
-    createdAt: serverTimestamp(),
-  });
-  return {
-    id: ref.id,
-    parentUid,
-    name: input.name,
-    age: input.age,
-    avatarId: input.avatarId,
-    streakCurrent: 0,
-    streakBest: 0,
-    totalSessions: 0,
-    badges: [],
-    createdAt: new Date(),
-  };
+  const profile = { parentUid, ...input, streakCurrent: 0, streakBest: 0, totalSessions: 0, badges: [] as Badge[] };
+  const ref = await addDoc(collection(db, 'children'), { ...profile, createdAt: serverTimestamp() });
+  return { id: ref.id, ...profile, createdAt: new Date() };
 }
 
 /**
@@ -101,25 +81,8 @@ export async function fetchActiveChild(parentUid: string): Promise<ChildProfile 
   return children[0];
 }
 
-/** Matches the internal doc cap of `fetchRecentSessions` — see below. */
+/** Matches the internal doc cap of `fetchRecentSessions`. */
 const SESSION_COUNT_CAP = 200;
-
-/**
- * This child's session history, including the one just saved — or null when it
- * can't be trusted, so the caller falls back to a blind increment. Children created before session counting existed carry a stale
- * `totalSessions: 0`, which would keep the count-based badges locked forever;
- * reconciling from the session docs themselves backfills them.
- *
- * ponytail: `fetchRecentSessions` reads at most 200 session docs, so the count
- * saturates there and a child past 200 sessions goes back to incrementing.
- * Both count-based badges are long since earned by then. Upgrade path: an
- * indexed count() aggregate once history routinely outgrows the cap.
- */
-async function fetchSessionHistory(child: ChildProfile): Promise<RecentSession[] | null> {
-  const sessions = await fetchRecentSessions(child.parentUid, child.id, SESSION_COUNT_CAP);
-  if (sessions.length === 0 || sessions.length >= SESSION_COUNT_CAP) return null; // failed, or capped out
-  return sessions;
-}
 
 export interface SessionRecord {
   streakCurrent: number;
@@ -149,7 +112,15 @@ export async function recordSession(
 
   // Everything from here degrades quietly: the session doc is already saved.
   try {
-    const history = await fetchSessionHistory(child);
+    // This child's history, including the session just saved — null when it
+    // can't be trusted (failed, or capped out), so we fall back to a blind
+    // increment. Children created before session counting existed carry a
+    // stale `totalSessions: 0`; reconciling from the docs backfills them.
+    // ponytail: the count saturates at SESSION_COUNT_CAP, after which a child
+    // goes back to incrementing (both count badges long earned by then).
+    // Upgrade path: an indexed count() aggregate.
+    const sessions = await fetchRecentSessions(child.parentUid, child.id, SESSION_COUNT_CAP);
+    const history = sessions.length === 0 || sessions.length >= SESSION_COUNT_CAP ? null : sessions;
     // Never walk the counter backwards if the history read came up short.
     counted = history ? Math.max(history.length, child.totalSessions) : null;
     totalSessions = counted ?? totalSessions;

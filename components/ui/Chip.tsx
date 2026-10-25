@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { Pressable, Text, type ViewStyle } from 'react-native';
 
 import { hardShadow, motion, radius, tokens } from '@/lib/tokens';
@@ -6,7 +6,6 @@ import { hardShadow, motion, radius, tokens } from '@/lib/tokens';
 interface ChipProps {
   label: string;
   selected?: boolean;
-  icon?: ReactNode;
   onPress?: () => void;
   style?: ViewStyle;
   accessibilityLabel?: string;
@@ -19,7 +18,6 @@ interface ChipProps {
 export function Chip({
   label,
   selected = false,
-  icon,
   onPress,
   style,
   accessibilityLabel,
@@ -53,7 +51,6 @@ export function Chip({
         style,
       ]}
     >
-      {icon}
       <Text
         className="font-display"
         style={{ color: selected ? tokens.textOnBrand : tokens.textPrimary, fontSize: 18 }}

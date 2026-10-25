@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { fetchActiveChild } from '@/lib/children';
 import { useAuthStore } from '@/stores/authStore';
@@ -14,15 +14,10 @@ export function useActiveChild() {
   const user = useAuthStore((s) => s.user);
   const activeChild = useChildStore((s) => s.activeChild);
   const setActiveChild = useChildStore((s) => s.setActiveChild);
-  const [loading, setLoading] = useState(!activeChild);
 
   useEffect(() => {
     let cancelled = false;
-    if (activeChild || !user) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
+    if (activeChild || !user) return;
     (async () => {
       try {
         const child = await fetchActiveChild(user.uid);
@@ -35,8 +30,6 @@ export function useActiveChild() {
       } catch {
         // Couldn't load (offline, rules, …) — stay put instead of sending the
         // parent to child setup, which would create a duplicate profile.
-      } finally {
-        if (!cancelled) setLoading(false);
       }
     })();
     return () => {
@@ -44,5 +37,5 @@ export function useActiveChild() {
     };
   }, [user, activeChild, setActiveChild]);
 
-  return { child: activeChild, loading };
+  return { child: activeChild };
 }

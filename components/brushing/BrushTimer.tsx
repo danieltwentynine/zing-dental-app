@@ -6,7 +6,6 @@ import { palette, tokens } from '@/lib/tokens';
 interface BrushTimerProps {
   remaining?: number;
   total?: number;
-  label?: string;
   size?: number;
   style?: ViewStyle;
 }
@@ -16,7 +15,7 @@ interface BrushTimerProps {
  * white, ink-outlined dial with Fredoka numerals, readable on any background. Purely presentational: pass the
  * remaining seconds; drive it from the session state machine.
  */
-export function BrushTimer({ remaining = 120, total = 120, label = '', size = 240, style }: BrushTimerProps) {
+export function BrushTimer({ remaining = 120, total = 120, size = 240, style }: BrushTimerProps) {
   const r = size / 2 - 14;
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, 1 - remaining / total));
@@ -48,11 +47,6 @@ export function BrushTimer({ remaining = 120, total = 120, label = '', size = 24
         >
           {mm}:{ss}
         </Text>
-        {label ? (
-          <Text className="font-body-semi" style={{ fontSize: 14, color: tokens.textSecondary }}>
-            {label}
-          </Text>
-        ) : null}
       </View>
     </View>
   );

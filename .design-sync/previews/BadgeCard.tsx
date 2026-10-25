@@ -11,6 +11,6 @@ export const Shelf = () => (
   </div>
 );
 
-export const Earned = () => <BadgeCard type="perfect" earned caption="All 10 zones!" />;
+export const Earned = () => <BadgeCard type="perfect" earned />;
 
-export const Locked = () => <BadgeCard type="weeklyGoal" earned={false} caption="Brush 7 days" />;
+export const Locked = () => <BadgeCard type="weeklyGoal" earned={false} />;

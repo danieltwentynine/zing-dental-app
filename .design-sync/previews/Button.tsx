@@ -8,7 +8,6 @@ export const Primary = () => <div style={stack}><Button label="Start brushing" s
 export const Variants = () => (
   <div style={stack}>
     <Button label="See my progress" onPress={noop} />
-    <Button label="Brush again" variant="secondary" onPress={noop} />
     <Button label="Brush again" variant="soft" onPress={noop} />
     <Button label="Continue with Google" variant="outline" onPress={noop} />
     <Button label="I already have an account" variant="ghost" onPress={noop} />

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { useActiveChild } from '@/hooks/useActiveChild';
-import { sameDay } from '@/lib/dates';
+import { sameDay } from '@/lib/streak';
 import { fetchRecentSessions, type RecentSession } from '@/lib/sessions';
 import { outline, radius, tokens } from '@/lib/tokens';
 import type { Badge as BadgeType } from '@/types';

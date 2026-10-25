@@ -10,7 +10,7 @@ import {
   Star,
 } from 'phosphor-react-native';
 import { useState, type ComponentType } from 'react';
-import { Pressable, View, type ViewStyle } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { motion, outline, palette, radius, tokens } from '@/lib/tokens';
 
@@ -38,10 +38,9 @@ interface AvatarProps {
   avatarId?: string;
   size?: number;
   ring?: boolean;
-  style?: ViewStyle;
 }
 
-export function Avatar({ avatarId = 'dog', size = 56, ring = false, style }: AvatarProps) {
+export function Avatar({ avatarId = 'dog', size = 56, ring = false }: AvatarProps) {
   const a = AVATARS[avatarId] ?? AVATARS.dog;
   const circle = (
     <View
@@ -55,7 +54,6 @@ export function Avatar({ avatarId = 'dog', size = 56, ring = false, style }: Ava
           justifyContent: 'center',
         },
         outline,
-        style,
       ]}
     >
       <a.Icon size={size * 0.52} color="#fff" weight="fill" />

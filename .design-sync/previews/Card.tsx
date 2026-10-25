@@ -24,7 +24,7 @@ export const ChildHeader = () => (
 
 export const Tones = () => (
   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, width: 360 }}>
-    {(['plain', 'soft', 'sky', 'sunken', 'cobalt', 'sunny'] as const).map((tone) => (
+    {(['plain', 'soft', 'cobalt'] as const).map((tone) => (
       <Card key={tone} tone={tone} padding={16}>
         <span style={text}>{tone}</span>
       </Card>

@@ -10,19 +10,6 @@ export type ToothZone =
   | 'bottom-back-left'
   | 'bottom-back-right';
 
-export interface BrushingSession {
-  id: string;
-  childId: string;
-  startedAt: Date;
-  completedAt?: Date;
-  durationSeconds: number;
-  zonesDetected: ToothZone[];
-  zonesCoverage: Record<ToothZone, number>;
-  score: number;
-  coachMessage?: string;
-  streak: number;
-}
-
 export interface ChildProfile {
   id: string;
   parentUid: string;
@@ -43,11 +30,3 @@ export interface Badge {
   earnedAt: Date;
   type: 'streak' | 'perfect' | 'firstSession' | 'weeklyGoal';
 }
-
-export type SessionState =
-  | 'IDLE'
-  | 'COUNTDOWN'
-  | 'ACTIVE'
-  | 'PAUSED'
-  | 'COMPLETED'
-  | 'RESULTS';

@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, Text, type ViewStyle } from 'react-native
 
 import { hardShadow, motion, outline, palette, radius, tokens } from '@/lib/tokens';
 
-type ButtonVariant = 'primary' | 'secondary' | 'reward' | 'soft' | 'ghost' | 'outline';
+type ButtonVariant = 'primary' | 'soft' | 'ghost' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps {
@@ -15,7 +15,6 @@ interface ButtonProps {
   loading?: boolean;
   disabled?: boolean;
   icon?: ReactNode;
-  iconRight?: ReactNode;
   style?: ViewStyle;
 }
 
@@ -26,11 +25,9 @@ const SIZES: Record<ButtonSize, { height: number; paddingHorizontal: number; fon
   lg: { height: 64, paddingHorizontal: 32, font: 22 },
 };
 
-// White text only on cobalt and bubblegum-600; sunny always takes ink.
+// White text only on cobalt (Toy box contrast rule).
 const VARIANTS: Record<ButtonVariant, { bg: string; fg: string; toy: boolean }> = {
   primary: { bg: tokens.brandPrimary, fg: tokens.textOnBrand, toy: true },
-  secondary: { bg: tokens.brandSecondary, fg: tokens.textOnBrand, toy: true },
-  reward: { bg: palette.sunny[500], fg: tokens.textPrimary, toy: true },
   soft: { bg: tokens.surfaceMint, fg: palette.cobalt[700], toy: true },
   outline: { bg: tokens.surfaceCard, fg: tokens.textPrimary, toy: true },
   ghost: { bg: 'transparent', fg: palette.cobalt[700], toy: false },
@@ -45,7 +42,6 @@ export function Button({
   loading = false,
   disabled = false,
   icon,
-  iconRight,
   style,
 }: ButtonProps) {
   const isDisabled = disabled || loading;
@@ -97,7 +93,6 @@ export function Button({
           >
             {label}
           </Text>
-          {iconRight}
         </>
       )}
     </Pressable>
