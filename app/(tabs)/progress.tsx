@@ -12,7 +12,7 @@ import { SectionTitle } from '@/components/ui/SectionTitle';
 import { useActiveChild } from '@/hooks/useActiveChild';
 import { sameDay } from '@/lib/dates';
 import { fetchRecentSessions, type RecentSession } from '@/lib/sessions';
-import { radius, tokens } from '@/lib/tokens';
+import { outline, radius, tokens } from '@/lib/tokens';
 import type { Badge as BadgeType } from '@/types';
 
 const WEEK_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -69,7 +69,7 @@ export default function ProgressScreen() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: tokens.surfacePage }}>
       <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 4, rowGap: 22 }}>
-        <Text className="font-display" style={{ fontSize: 26, color: tokens.textPrimary }}>
+        <Text className="font-display" style={{ fontSize: 28, color: tokens.textPrimary }}>
           {child?.name ? `${child.name}'s progress` : 'Progress'}
         </Text>
 
@@ -83,17 +83,18 @@ export default function ProgressScreen() {
               <View key={i} style={{ alignItems: 'center', rowGap: 8 }}>
                 <View
                   style={{
-                    width: 32,
-                    height: 32,
+                    width: 34,
+                    height: 34,
                     borderRadius: radius.pill,
                     alignItems: 'center',
                     justifyContent: 'center',
                     backgroundColor: w.done ? tokens.brandPrimary : tokens.surfaceSunken,
+                    ...outline,
                   }}
                 >
                   {w.done ? <Check size={16} color="#fff" weight="bold" /> : null}
                 </View>
-                <Text className="font-bodySemibold" style={{ fontSize: 12, color: tokens.textTertiary }}>
+                <Text className="font-body-semi" style={{ fontSize: 14, color: tokens.textSecondary }}>
                   {w.d}
                 </Text>
               </View>
@@ -104,7 +105,7 @@ export default function ProgressScreen() {
         {/* Badges */}
         <View>
           <SectionTitle>Badges</SectionTitle>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ columnGap: 12, paddingBottom: 4 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ columnGap: 12, paddingBottom: 10, paddingHorizontal: 2 }}>
             {BADGE_TYPES.map((type) => (
               <BadgeCard key={type} type={type} earned={earnedBadgeTypes.has(type)} />
             ))}
@@ -125,15 +126,15 @@ export default function ProgressScreen() {
                     justifyContent: 'space-between',
                     paddingVertical: 12,
                     paddingHorizontal: 14,
-                    borderBottomWidth: i < history.length - 1 ? 1 : 0,
+                    borderBottomWidth: i < history.length - 1 ? 2 : 0,
                     borderBottomColor: tokens.borderSubtle,
                   }}
                 >
-                  <Text className="font-bodySemibold" style={{ fontSize: 15, color: tokens.textPrimary }}>
+                  <Text className="font-body-semi" style={{ fontSize: 16, color: tokens.textPrimary }}>
                     {h.day}
                   </Text>
                   <Badge
-                    tone={h.score >= 80 ? 'mint' : 'warning'}
+                    tone={h.score >= 80 ? 'cobalt' : 'warning'}
                     solid={h.score >= 80}
                     label={`${h.score}/100`}
                   />
@@ -142,7 +143,7 @@ export default function ProgressScreen() {
             </Card>
           ) : (
             <Card padding={18}>
-              <Text className="font-bodySemibold" style={{ fontSize: 15, color: tokens.textSecondary }}>
+              <Text className="font-body" style={{ fontSize: 16, color: tokens.textSecondary }}>
                 No sessions yet — time for the first brushing adventure!
               </Text>
             </Card>

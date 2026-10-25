@@ -3,7 +3,7 @@ import { ChartLineUp, House, Tooth } from 'phosphor-react-native';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { shadows, tokens } from '@/lib/tokens';
+import { hardShadow, tokens } from '@/lib/tokens';
 
 function TabItem({
   label,
@@ -16,11 +16,16 @@ function TabItem({
   icon: (color: string, weight: 'bold' | 'fill') => React.ReactNode;
   onPress: () => void;
 }) {
-  const color = active ? tokens.brandPrimary : tokens.textTertiary;
+  const color = active ? tokens.textLink : tokens.textTertiary;
   return (
-    <Pressable onPress={onPress} style={{ flex: 1, alignItems: 'center', rowGap: 4 }}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+      style={{ flex: 1, minHeight: 48, alignItems: 'center', rowGap: 4 }}
+    >
       {icon(color, active ? 'fill' : 'bold')}
-      <Text className="font-subhead" style={{ fontSize: 11, color }}>
+      <Text className="font-display-semi" style={{ fontSize: 13, color }}>
         {label}
       </Text>
     </Pressable>
@@ -46,10 +51,9 @@ function ZingTabBar({ state, navigation }: TabBarProps) {
           paddingBottom: insets.bottom > 0 ? insets.bottom : 12,
           height: 76 + (insets.bottom > 0 ? insets.bottom : 12),
           backgroundColor: tokens.surfaceCard,
-          borderTopWidth: 1,
-          borderTopColor: tokens.borderSubtle,
+          borderTopWidth: 3,
+          borderTopColor: tokens.borderStrong,
         },
-        shadows.sm,
       ]}
     >
       <TabItem
@@ -72,19 +76,17 @@ function ZingTabBar({ state, navigation }: TabBarProps) {
               height: 66,
               borderRadius: 33,
               backgroundColor: tokens.brandPrimary,
-              borderWidth: 4,
-              borderColor: tokens.surfaceCard,
               alignItems: 'center',
               justifyContent: 'center',
             },
-            shadows.mint,
+            hardShadow(5),
           ]}
         >
           <Tooth size={30} color="#fff" weight="fill" />
         </Pressable>
         <Text
-          className="font-subhead"
-          style={{ position: 'absolute', top: 46, fontSize: 11, color: tokens.brandPrimary }}
+          className="font-display-semi"
+          style={{ position: 'absolute', top: 46, fontSize: 13, color: tokens.textLink }}
         >
           Brush
         </Text>

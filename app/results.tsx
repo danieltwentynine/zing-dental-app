@@ -5,14 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CoachCard } from '@/components/brushing/CoachCard';
 import { MouthMap } from '@/components/brushing/MouthMap';
 import { Button } from '@/components/ui/Button';
-import { tokens } from '@/lib/tokens';
+import { outline, tokens } from '@/lib/tokens';
 import { useSessionStore } from '@/stores/sessionStore';
 
 function LegendDot({ color, label }: { color: string; label: string }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 5 }}>
-      <View style={{ width: 11, height: 11, borderRadius: 3, backgroundColor: color }} />
-      <Text className="font-bodySemibold" style={{ fontSize: 12, color: tokens.textSecondary }}>
+      <View style={{ width: 16, height: 16, borderRadius: 5, backgroundColor: color, ...outline, borderWidth: 2 }} />
+      <Text className="font-body-semi" style={{ fontSize: 14, color: tokens.textSecondary }}>
         {label}
       </Text>
     </View>
@@ -34,8 +34,8 @@ export default function ResultsScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tokens.surfacePage }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: 28, paddingTop: 8, alignItems: 'center' }}>
         <Text
-          className="font-subhead"
-          style={{ fontSize: 14, letterSpacing: 1.1, color: tokens.brandPrimary, marginTop: 6 }}
+          className="font-display-semi"
+          style={{ fontSize: 15, letterSpacing: 1.1, color: tokens.textLink, marginTop: 6 }}
         >
           SESSION COMPLETE
         </Text>
@@ -49,7 +49,7 @@ export default function ResultsScreen() {
           </Text>
         </View>
 
-        <Text className="font-display" style={{ fontSize: 22, color: tokens.textPrimary }}>
+        <Text className="font-display" style={{ fontSize: 26, color: tokens.textPrimary }}>
           {title}
         </Text>
 
@@ -69,8 +69,8 @@ export default function ResultsScreen() {
             store flips to 'pending' rather than spinning forever while offline. */}
         {saveStatus === 'saving' ? (
           <Text
-            className="font-bodySemibold"
-            style={{ fontSize: 13, color: tokens.textTertiary, marginTop: 14 }}
+            className="font-body-semi"
+            style={{ fontSize: 14, color: tokens.textSecondary, marginTop: 14 }}
           >
             Saving your session…
           </Text>
@@ -78,8 +78,8 @@ export default function ResultsScreen() {
 
         {saveStatus === 'pending' ? (
           <Text
-            className="font-bodySemibold"
-            style={{ fontSize: 13, color: tokens.textTertiary, marginTop: 14, textAlign: 'center' }}
+            className="font-body-semi"
+            style={{ fontSize: 14, color: tokens.textSecondary, marginTop: 14, textAlign: 'center' }}
           >
             Kept safe on this phone — it joins your progress when you're back online.
           </Text>
@@ -88,8 +88,8 @@ export default function ResultsScreen() {
         {saveStatus === 'failed' ? (
           <View style={{ alignItems: 'center', rowGap: 10, marginTop: 14 }}>
             <Text
-              className="font-bodySemibold"
-              style={{ fontSize: 13, color: tokens.zoneMissed, textAlign: 'center' }}
+              className="font-body-semi"
+              style={{ fontSize: 14, color: tokens.textPrimary, textAlign: 'center' }}
             >
               This one hasn't reached your progress yet.
             </Text>

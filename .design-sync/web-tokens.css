@@ -1,18 +1,18 @@
 /* Web-only design tokens with no app source (the app uses RN style objects).
    Carried over from the design project's hand-built tokens/{typography,spacing,effects}.css
    so guidelines/ and ui_kits/ keep rendering; colors + radii come from lib/tokens.ts.
-   Fonts follow the adopted typography (Baloo 2 app-wide, Space Grotesk numerals). */
+   Fonts follow the Toy box typography (Fredoka headings/numbers/buttons, Lexend body). */
 :root {
   /* Legacy color aliases still read by guidelines/ pages */
   --bg-tinted: var(--surface-page);
   --bg-mint: var(--surface-mint);
   --bg-sky: var(--surface-sky);
-  --success-500: var(--mint-500);
+  --success-500: var(--cobalt-500);
 
   /* Families */
-  --font-display: 'Baloo 2', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-body: 'Baloo 2', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-numeric: 'Space Grotesk', 'Baloo 2', ui-monospace, monospace;
+  --font-display: 'Fredoka', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Lexend', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-numeric: 'Fredoka', ui-monospace, monospace;
 
   /* Weights */
   --fw-regular: 500;

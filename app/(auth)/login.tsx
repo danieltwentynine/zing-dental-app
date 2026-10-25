@@ -144,17 +144,17 @@ export default function LoginScreen() {
             hitSlop={8}
             style={{ alignSelf: 'flex-end', marginTop: 10 }}
           >
-            <Text className="font-subhead text-sm text-mint-600">
+            <Text className="font-display-semi text-sm text-text-link">
               {sendingReset ? 'Sending…' : 'Forgot my password'}
             </Text>
           </Pressable>
 
           {submitError ? (
-            <Text className="mt-4 font-bodySemibold text-sm text-danger">{submitError}</Text>
+            <Text className="mt-4 font-body-semi text-sm text-danger">{submitError}</Text>
           ) : null}
 
           {resetNotice ? (
-            <Text className="mt-4 font-bodySemibold text-sm text-mint-600">{resetNotice}</Text>
+            <Text className="mt-4 font-body-semi text-sm text-text-link">{resetNotice}</Text>
           ) : null}
 
           <Button
@@ -168,7 +168,7 @@ export default function LoginScreen() {
           <View className="mt-6 flex-row justify-center">
             <Text className="font-body text-muted">New to Zing? </Text>
             <Pressable onPress={() => router.replace('/(auth)/register')}>
-              <Text className="font-subhead text-mint-600">Create an account</Text>
+              <Text className="font-display-semi text-text-link">Create an account</Text>
             </Pressable>
           </View>
         </ScrollView>

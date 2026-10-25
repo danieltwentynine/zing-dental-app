@@ -174,7 +174,7 @@ export default function RegisterScreen() {
           </View>
 
           {submitError ? (
-            <Text className="mt-4 font-bodySemibold text-sm text-danger">{submitError}</Text>
+            <Text className="mt-4 font-body-semi text-sm text-danger">{submitError}</Text>
           ) : null}
 
           <Button
@@ -188,7 +188,7 @@ export default function RegisterScreen() {
           <View className="mt-4 flex-row justify-center">
             <Text className="font-body text-muted">Already have an account? </Text>
             <Pressable onPress={() => router.replace('/(auth)/login')}>
-              <Text className="font-subhead text-mint-600">Log in</Text>
+              <Text className="font-display-semi text-text-link">Log in</Text>
             </Pressable>
           </View>
         </ScrollView>

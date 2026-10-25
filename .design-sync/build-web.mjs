@@ -71,23 +71,15 @@ writeFileSync(join(DIST, 'index.d.ts'), entry + '\n');
 // 3. CSS: Tailwind (NativeWind preset) for className-styled components.
 execFileSync(join(ROOT, 'node_modules/.bin/tailwindcss'), ['-i', 'global.css', '-c', 'tailwind.config.js', '-o', join(DIST, 'styles.css')], { stdio: 'inherit' });
 
-// 4. Fonts: the PostScript-named families the components reference.
-const FONTS = {
-  'baloo-2': ['500Medium', '600SemiBold', '700Bold', '800ExtraBold'],
-  'space-grotesk': ['700Bold'],
-  nunito: ['800ExtraBold'],
-};
-const FAMILY = { 'baloo-2': 'Baloo 2', 'space-grotesk': 'Space Grotesk' };
+// 4. Fonts: the static-weight families the components reference (assets/fonts, from the design export).
+// Also as weighted families ('Fredoka', 'Lexend') so CSS font-weight works in hand-written glue.
+const WEIGHT = { Medium: 500, SemiBold: 600, Bold: 700, Regular: 400 };
 const faces = [];
-for (const [pkg, weights] of Object.entries(FONTS)) {
-  for (const w of weights) {
-    const dir = join(ROOT, 'node_modules/@expo-google-fonts', pkg, w);
-    const ttf = readdirSync(dir).find((n) => n.endsWith('.ttf'));
-    copyFileSync(join(dir, ttf), join(DIST, 'fonts', ttf));
-    faces.push(`@font-face { font-family: '${ttf.replace('.ttf', '')}'; src: url('./${ttf}') format('truetype'); font-display: block; }`);
-    // Also as a weighted family ('Baloo 2', 'Space Grotesk') so CSS font-weight works in hand-written glue.
-    if (pkg !== 'nunito') faces.push(`@font-face { font-family: '${FAMILY[pkg]}'; font-weight: ${parseInt(w)}; src: url('./${ttf}') format('truetype'); font-display: block; }`);
-  }
+for (const ttf of readdirSync(join(ROOT, 'assets/fonts')).filter((n) => n.endsWith('.ttf'))) {
+  copyFileSync(join(ROOT, 'assets/fonts', ttf), join(DIST, 'fonts', ttf));
+  const [family, style] = ttf.replace('.ttf', '').split('-');
+  faces.push(`@font-face { font-family: '${family}-${style}'; src: url('./${ttf}') format('truetype'); font-display: block; }`);
+  faces.push(`@font-face { font-family: '${family}'; font-weight: ${WEIGHT[style]}; src: url('./${ttf}') format('truetype'); font-display: block; }`);
 }
 writeFileSync(join(DIST, 'fonts', 'fonts.css'), faces.join('\n') + '\n');
 

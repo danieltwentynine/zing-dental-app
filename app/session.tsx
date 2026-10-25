@@ -1,21 +1,22 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Sparkle, X } from 'phosphor-react-native';
+import { X } from 'phosphor-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCameraPermission } from 'react-native-vision-camera';
 
 import { CameraBackdrop } from '@/components/brushing/CameraBackdrop';
 import { CameraGate } from '@/components/brushing/CameraGate';
 import { BrushTimer } from '@/components/brushing/BrushTimer';
 import { MouthMap, type ZoneState } from '@/components/brushing/MouthMap';
+import { Sticker } from '@/components/kids/Sticker';
+import { Button } from '@/components/ui/Button';
 import { buildCoachMessage } from '@/lib/coach';
 import { generateCoachMessage } from '@/lib/gemini';
 import { nextStreak } from '@/lib/streak';
 import { ALL_TOOTH_ZONES, BRUSHING_DURATION_SECONDS, COUNTDOWN_SECONDS } from '@/lib/constants';
-import { tokens } from '@/lib/tokens';
+import { outline, palette, tokens } from '@/lib/tokens';
 import { useChildStore } from '@/stores/childStore';
 import { useSessionStore } from '@/stores/sessionStore';
 import type { ToothZone } from '@/types';
@@ -38,6 +39,7 @@ export default function SessionScreen() {
   const setLastResult = useSessionStore((s) => s.setLastResult);
   const saveLastResult = useSessionStore((s) => s.saveLastResult);
 
+  const insets = useSafeAreaInsets();
   const camera = useCameraPermission();
   const [skipCamera, setSkipCamera] = useState(false);
   // Ask once (with an explainer first); denied or skipped just means guided mode.
@@ -147,7 +149,7 @@ export default function SessionScreen() {
   const currentZone = ALL_TOOTH_ZONES[Math.min(zonesReached, ALL_TOOTH_ZONES.length - 1)];
 
   return (
-    <LinearGradient colors={['#0b3b3a', '#051c20']} style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: palette.cobalt[900] }}>
       <StatusBar style="light" />
       {cameraOn ? <CameraBackdrop /> : null}
       <SafeAreaView style={{ flex: 1 }}>
@@ -156,51 +158,39 @@ export default function SessionScreen() {
           accessibilityLabel="Cancel brushing"
           onPress={() => router.back()}
           style={{
+            // Absolute children ignore SafeAreaView padding — offset by the inset.
             position: 'absolute',
-            top: 12,
+            top: insets.top + 12,
             right: 20,
             zIndex: 5,
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: 'rgba(255,255,255,0.14)',
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: tokens.surfaceCard,
             alignItems: 'center',
             justifyContent: 'center',
+            ...outline,
           }}
         >
-          <X size={20} color="#fff" weight="bold" />
+          <X size={22} color={tokens.textPrimary} weight="bold" />
         </Pressable>
 
         {askingForCamera ? (
           <CameraGate onAllow={() => void camera.requestPermission()} onSkip={() => setSkipCamera(true)} />
         ) : phase === 'countdown' ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', rowGap: 10 }}>
-            <Text className="font-numeric" style={{ fontSize: 140, color: '#fff', lineHeight: 150 }}>
+            <Text className="font-numeric" style={{ fontSize: 140, color: tokens.feedbackReward, lineHeight: 150 }}>
               {count <= 0 ? 'Go!' : count}
             </Text>
-            <Text className="font-bodySemibold" style={{ fontSize: 17, color: 'rgba(255,255,255,0.8)' }}>
+            <Text className="font-body-semi" style={{ fontSize: 18, color: tokens.textOnBrand }}>
               Get your toothbrush ready, {childName}!
             </Text>
           </View>
         ) : (
           <View style={{ flex: 1, alignItems: 'center', paddingHorizontal: 24, paddingVertical: 20 }}>
-            {/* Guided-brushing indicator (Phase 1 has no camera yet) */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                columnGap: 7,
-                backgroundColor: 'rgba(0,201,167,0.18)',
-                paddingHorizontal: 12,
-                paddingVertical: 5,
-                borderRadius: 999,
-                marginTop: 8,
-              }}
-            >
-              <Sparkle size={14} color="#54dcc2" weight="fill" />
-              <Text className="font-bodySemibold" style={{ fontSize: 12, color: '#8fe9d8' }}>
-                FOLLOW SPARKY'S GUIDE
-              </Text>
+            {/* Guided-brushing indicator (Phase 1 has no zone detection yet) */}
+            <View style={{ marginTop: 8 }}>
+              <Sticker label="Follow Sparky's guide" />
             </View>
 
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -209,7 +199,7 @@ export default function SessionScreen() {
 
             <Text
               className="font-display"
-              style={{ fontSize: 22, color: '#fff', textAlign: 'center', minHeight: 30 }}
+              style={{ fontSize: 24, color: tokens.textOnBrand, textAlign: 'center', minHeight: 32 }}
             >
               {ZONE_HINTS[currentZone]}
             </Text>
@@ -218,22 +208,10 @@ export default function SessionScreen() {
               <BrushTimer remaining={remaining} total={BRUSHING_DURATION_SECONDS} size={150} />
             </View>
 
-            <Pressable
-              onPress={() => void finish()}
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.15)',
-                paddingHorizontal: 28,
-                paddingVertical: 12,
-                borderRadius: 999,
-              }}
-            >
-              <Text className="font-subhead" style={{ fontSize: 15, color: '#fff' }}>
-                I'm done
-              </Text>
-            </Pressable>
+            <Button label="I'm done" variant="outline" size="sm" fullWidth={false} onPress={() => void finish()} />
           </View>
         )}
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 }

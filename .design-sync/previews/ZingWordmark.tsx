@@ -1,11 +1,10 @@
-import { ZingWordmark } from 'zing-ds';
+import { ZingLockup, ZingMark, ZingWordmark } from 'zing-ds';
 
-export const Default = () => <ZingWordmark height={56} />;
+export const Lockup = () => <ZingLockup height={56} />;
 
-export const Sizes = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-    <ZingWordmark height={32} />
-    <ZingWordmark height={56} />
-    <ZingWordmark width={240} />
+export const Parts = () => (
+  <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+    <ZingMark width={72} />
+    <ZingWordmark width={180} />
   </div>
 );

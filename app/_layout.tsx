@@ -1,14 +1,6 @@
 import '../global.css';
 
-import {
-  Baloo2_500Medium,
-  Baloo2_600SemiBold,
-  Baloo2_700Bold,
-  Baloo2_800ExtraBold,
-  useFonts,
-} from '@expo-google-fonts/baloo-2';
-import { Nunito_800ExtraBold } from '@expo-google-fonts/nunito';
-import { SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -22,13 +14,13 @@ import { useAuthStore } from '@/stores/authStore';
 export default function RootLayout() {
   const setUser = useAuthStore((state) => state.setUser);
 
+  // Static weights: the family name picks the weight (see font in lib/tokens.ts).
   const [fontsLoaded] = useFonts({
-    Baloo2_500Medium,
-    Baloo2_600SemiBold,
-    Baloo2_700Bold,
-    Baloo2_800ExtraBold,
-    Nunito_800ExtraBold, // wordmark only (ZingBrand) — UI text uses Baloo 2
-    SpaceGrotesk_700Bold,
+    'Fredoka-Medium': require('../assets/fonts/Fredoka-Medium.ttf'),
+    'Fredoka-SemiBold': require('../assets/fonts/Fredoka-SemiBold.ttf'),
+    'Fredoka-Bold': require('../assets/fonts/Fredoka-Bold.ttf'),
+    'Lexend-Regular': require('../assets/fonts/Lexend-Regular.ttf'),
+    'Lexend-SemiBold': require('../assets/fonts/Lexend-SemiBold.ttf'),
   });
 
   useEffect(() => {

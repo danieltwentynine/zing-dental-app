@@ -1,8 +1,7 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { Text, View, type ViewStyle } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { radius, shadows, tokens } from '@/lib/tokens';
+import { hardShadow, outline, palette, radius, tokens } from '@/lib/tokens';
 
 function Flame({ size = 18 }: { size?: number }) {
   return (
@@ -10,6 +9,9 @@ function Flame({ size = 18 }: { size?: number }) {
       <Path
         d="M12 2c.6 3.2-1.7 4.6-3 6-1.4 1.5-2.5 3.2-2.5 5.5A5.5 5.5 0 0 0 12 19a5.5 5.5 0 0 0 5.5-5.5c0-1.7-.7-3-1.6-4.2-.5 1-1.3 1.6-2.2 1.7.9-2.4.2-5.6-1.7-9Z"
         fill={tokens.feedbackReward}
+        stroke={tokens.textPrimary}
+        strokeWidth={1.6}
+        strokeLinejoin="round"
       />
       <Path
         d="M12 19a3 3 0 0 1-3-3c0-1.4 1-2.4 1.8-3.3.4 1 1.2 1.5 2.2 1.6-.5 1.4-.1 3.2 1 4.2A3 3 0 0 1 12 19Z"
@@ -37,17 +39,18 @@ export function StreakDisplay({ days = 0, best = null, layout = 'card', style }:
             flexDirection: 'row',
             alignItems: 'center',
             columnGap: 6,
-            height: 30,
+            height: 34,
             paddingLeft: 10,
             paddingRight: 12,
             borderRadius: radius.pill,
-            backgroundColor: '#fff3cf',
+            backgroundColor: palette.sunny[100],
           },
+          outline,
           style,
         ]}
       >
         <Flame size={18} />
-        <Text className="font-numeric" style={{ color: '#9a7b12', fontSize: 15 }}>
+        <Text className="font-numeric" style={{ color: tokens.textPrimary, fontSize: 16 }}>
           {days}
         </Text>
       </View>
@@ -55,10 +58,7 @@ export function StreakDisplay({ days = 0, best = null, layout = 'card', style }:
   }
 
   return (
-    <LinearGradient
-      colors={['#FFF7E0', '#FFEFC2']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+    <View
       style={[
         {
           flexDirection: 'row',
@@ -66,8 +66,9 @@ export function StreakDisplay({ days = 0, best = null, layout = 'card', style }:
           columnGap: 14,
           padding: 18,
           borderRadius: radius.xl,
+          backgroundColor: palette.sunny[100],
         },
-        shadows.card,
+        hardShadow(6),
         style,
       ]}
     >
@@ -77,24 +78,24 @@ export function StreakDisplay({ days = 0, best = null, layout = 'card', style }:
             width: 56,
             height: 56,
             borderRadius: radius.pill,
-            backgroundColor: '#fff',
+            backgroundColor: tokens.surfaceCard,
             alignItems: 'center',
             justifyContent: 'center',
           },
-          shadows.sunny,
+          outline,
         ]}
       >
         <Flame size={30} />
       </View>
       <View>
-        <Text className="font-numeric" style={{ fontSize: 32, color: '#8a6d10', lineHeight: 36 }}>
+        <Text className="font-numeric" style={{ fontSize: 32, color: tokens.textPrimary, lineHeight: 36 }}>
           {days} {days === 1 ? 'day' : 'days'}
         </Text>
-        <Text className="font-bodySemibold" style={{ fontSize: 14, color: '#a9842a' }}>
+        <Text className="font-body-semi" style={{ fontSize: 14, color: tokens.textSecondary }}>
           {days > 0 ? 'brushing streak' : 'Start your streak today!'}
           {best != null && days > 0 ? `  ·  best ${best}` : ''}
         </Text>
       </View>
-    </LinearGradient>
+    </View>
   );
 }

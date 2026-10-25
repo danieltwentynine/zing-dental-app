@@ -12,10 +12,10 @@ export const Plain = () => (
 
 export const ChildHeader = () => (
   <div style={{ width: 360 }}>
-    <Card tone="mint" padding={18} radius={32}>
+    <Card tone="soft" padding={18} radius={32}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <Avatar avatarId="shark" size={62} />
-        <div style={{ flex: 1, fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 20, color: 'var(--text-primary)' }}>Leo</div>
+        <div style={{ flex: 1, fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--text-primary)' }}>Leo</div>
         <StreakDisplay days={4} layout="chip" />
       </div>
     </Card>
@@ -24,7 +24,7 @@ export const ChildHeader = () => (
 
 export const Tones = () => (
   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, width: 360 }}>
-    {(['plain', 'mint', 'sky', 'sunken', 'outline'] as const).map((tone) => (
+    {(['plain', 'soft', 'sky', 'sunken', 'cobalt', 'sunny'] as const).map((tone) => (
       <Card key={tone} tone={tone} padding={16}>
         <span style={text}>{tone}</span>
       </Card>

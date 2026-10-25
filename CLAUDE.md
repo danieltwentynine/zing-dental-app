@@ -54,7 +54,7 @@ app/                              # Expo Router screens
 components/
 ├── brand/ZingBrand.tsx
 ├── brushing/ MouthMap.tsx, BrushTimer.tsx, CoachCard.tsx
-├── kids/ Avatar.tsx, BadgeCard.tsx, StreakDisplay.tsx
+├── kids/ Avatar.tsx, BadgeCard.tsx, StreakDisplay.tsx, Sticker.tsx
 └── ui/ Badge, Button, Card, Chip, Input, SafeScreen, SectionTitle
 hooks/useActiveChild.ts
 lib/
@@ -173,8 +173,8 @@ This is the most important UI component. It is an SVG overlay displayed on top o
 
 - 10 zones total (see `ToothZone` type)
 - Default state: all zones gray/empty
-- As zones are detected: fill progressively with a mint/green color
-- Fully brushed zone: solid green + checkmark icon
+- As zones are detected: fill progressively (light cobalt `zoneActive`)
+- Fully brushed zone: solid cobalt + checkmark icon; every zone has a 3px ink outline
 - At session end: show missed zones highlighted in soft orange (never red — too alarming for kids)
 - The SVG must be responsive and overlay correctly on any phone screen size
 - Zones animate smoothly — no harsh flickers
@@ -203,21 +203,25 @@ IDLE → COUNTDOWN (3s) → ACTIVE → PAUSED → COMPLETED → RESULTS
 
 ## Design System
 
-**Palette:**
-- Primary: `#00C9A7` (mint green) — main brand color, brushing success
-- Secondary: `#4FC3F7` (sky blue) — secondary actions, progress
-- Background: `#F8FFFE` (near white with mint tint) — main screen bg
-- Surface: `#FFFFFF` — cards, modals
-- Text Primary: `#0F2027` — headings
-- Text Secondary: `#64748B` — body, labels
-- Warning: `#FFB347` — missed zones (warm orange, never red)
-- Danger: Only for auth errors, never shown to children
+Toy box design system, adopted 2026-10-24 from the Claude Design code export (`zing-design-system.zip`). Values live in `lib/tokens.ts` (inline styles/SVG) and `tailwind.preset.js` (classes) — the preset is generated; regenerate it rather than hand-editing.
 
-**Typography:**
-- UI typeface: `Baloo 2` (chunky, warm, rounded) — single family app-wide, per design-system font exploration option 1b
-  - Headings: weight 800 · Subheads/section titles/buttons: 700 · Body: 500 · Labels/captions: 600
-- Numbers/scores: `Space Grotesk` — weight 700 (unchanged)
-- Brand wordmark only: `Nunito` 800 (in `ZingBrand.tsx` — the logo is not UI text)
+**Palette:**
+- Primary: `#2D5BFF` (cobalt) — main brand color, brushing success. Press: `#1F45DB`
+- Secondary: `#D6247A` (bubblegum-600) · Reward: `#FFD23F` (sunny)
+- Background: `#FFF6DA` (warm cream) — main screen bg · Surface: `#FFFFFF`
+- Ink: `#14142B` — headings, outlines, hard shadows · Text Secondary: `#55557A`
+- Warning: `#FFB347` — missed zones / retry (warm orange, never red)
+- Danger `#DC2626`: parent-facing auth errors only, never shown to children
+
+**Signature (non-negotiable):** every card, button, tile and sticker gets a 3px ink outline + hard drop shadow (`hardShadow()` / `outline` in `lib/tokens.ts`, `boxShadow: '0 6px 0 #14142B'`). No blurred shadows, no gradients. Press feedback = scale 0.96 and the drop shrinks. Only stickers tilt (±3–6°). Touch targets ≥ 48px, controls 56px.
+
+**Contrast:** white text only on cobalt-500/600 and bubblegum-600. Sunny and bubblegum-500 always take ink text.
+
+**Typography:** static weights — choose the family, never `fontWeight`.
+- `Fredoka` (Bold / SemiBold / Medium) — headings, numbers/scores, buttons
+- `Lexend` (Regular / SemiBold) — body (min 16px) and labels
+
+**Logo vs mascot:** the logo is the tooth with the lightning bolt (`ZingMark`, `ZingLockup`). Sparky (the foam bubble) is the mascot — splash, empty states, rewards, coaching. Never redraw either; use `components/brand/ZingBrand.tsx`.
 
 **Tone (copy):**
 - For children: enthusiastic, uses "!" sparingly, never clinical
@@ -317,11 +321,11 @@ There is no linter configured. `tsc --noEmit` plus the self-checks are the gates
 
 - Entry point is `expo-router/entry` (set in `package.json` `main`); the template's `App.tsx`/`index.ts` were deleted.
 - Path alias `@/*` maps to the repo root (see `tsconfig.json`). Use it for all cross-directory imports.
-- NativeWind v4 is wired through `babel.config.js` (`jsxImportSource: 'nativewind'` + `nativewind/babel`), `metro.config.js` (`withNativeWind` with `global.css`), and `tailwind.config.js` (design-system colors and font families as Tailwind tokens: `primary`, `ink`, `muted`, `font-display`, `font-body`, etc.).
+- NativeWind v4 is wired through `babel.config.js` (`jsxImportSource: 'nativewind'` + `nativewind/babel`), `metro.config.js` (`withNativeWind` with `global.css`), and `tailwind.config.js` (`presets: [nativewind/preset, ./tailwind.preset]` supplies the design-system colors, fonts, radii and `shadow-toy*`/`border-toy`; app-only aliases `ink`, `muted`, `danger` live in the config).
 - Firebase Auth uses `initializeAuth` + `getReactNativePersistence(AsyncStorage)` in `lib/firebase.ts`. The firebase v12 wrapper's web typings omit `getReactNativePersistence` (it exists in the RN runtime build) — `types/firebase-auth.d.ts` augments the module; do not work around it with `@ts-ignore`.
-- Fonts are loaded once in `app/_layout.tsx` via `@expo-google-fonts/*` packages and referenced by PostScript name in Tailwind: `font-display` → `Baloo2_800ExtraBold`, `font-subhead` → `Baloo2_700Bold`, `font-body` → `Baloo2_500Medium`, `font-bodySemibold` → `Baloo2_600SemiBold`, `font-numeric` → `SpaceGrotesk_700Bold`. `Nunito_800ExtraBold` stays loaded solely for the SVG wordmark in `ZingBrand.tsx`.
+- Fonts are bundled TTFs in `assets/fonts/` loaded once in `app/_layout.tsx` via `expo-font` `useFonts`, referenced by family name: `font-display` → `Fredoka-Bold`, `font-display-semi` → `Fredoka-SemiBold`, `font-body` → `Lexend-Regular`, `font-body-semi` → `Lexend-SemiBold`, `font-numeric` → `Fredoka-Bold` (inline styles: `font.*` in `lib/tokens.ts`).
 - Auth state flows: `onAuthStateChanged` subscription in `app/_layout.tsx` → `stores/authStore.ts` (Zustand) → `app/index.tsx` redirects to `(tabs)/home` when signed in, else `onboarding/welcome`.
-- NativeWind 4.2.5 drops function-form `Pressable` styles (upstream #1105); `Button.tsx` uses a pressed-state workaround — don't revert it.
+- NativeWind 4.2.5 drops function-form `Pressable` styles (upstream #1105); `Button`, `Chip`, `Card` and `AvatarPicker` keep pressed state in React state instead — don't revert it.
 - Fabric: don't make style *keys* conditional on focus (it recreates the native view and drops `TextInput` focus). Keep the keys, change the values.
 - Finished sessions go through `lib/outbox.ts` so an offline write is retried, not lost. Session docs are idempotent via a stable id; `totalSessions` is an increment, guarded by `inFlight` in `sessionStore`.
 

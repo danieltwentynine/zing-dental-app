@@ -1,9 +1,9 @@
 import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, Text, type ViewStyle } from 'react-native';
 
-import { motion, palette, radius, shadows, tokens } from '@/lib/tokens';
+import { hardShadow, motion, outline, palette, radius, tokens } from '@/lib/tokens';
 
-type ButtonVariant = 'primary' | 'secondary' | 'soft' | 'ghost' | 'outline';
+type ButtonVariant = 'primary' | 'secondary' | 'reward' | 'soft' | 'ghost' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps {
@@ -19,20 +19,21 @@ interface ButtonProps {
   style?: ViewStyle;
 }
 
-const SIZES: Record<ButtonSize, { height: number; paddingHorizontal: number; font: number; radius: number }> = {
-  sm: { height: 44, paddingHorizontal: 18, font: 15, radius: radius.md },
-  md: { height: 56, paddingHorizontal: 24, font: 18, radius: radius.lg },
-  lg: { height: 64, paddingHorizontal: 32, font: 20, radius: radius.xl },
+// Controls are 56px; sm still clears the 48px touch-target minimum.
+const SIZES: Record<ButtonSize, { height: number; paddingHorizontal: number; font: number }> = {
+  sm: { height: 48, paddingHorizontal: 20, font: 16 },
+  md: { height: 56, paddingHorizontal: 28, font: 20 },
+  lg: { height: 64, paddingHorizontal: 32, font: 22 },
 };
 
-const VARIANTS: Record<ButtonVariant, { bg: string; fg: string; shadow?: ViewStyle; border?: string }> = {
-  primary: { bg: tokens.brandPrimary, fg: tokens.textOnBrand, shadow: shadows.mint },
-  secondary: { bg: tokens.brandSecondary, fg: tokens.textOnBrand, shadow: shadows.sky },
-  soft: { bg: tokens.surfaceMint, fg: palette.mint[700] },
-  // mint-500 on the near-white page bg is ~2:1 contrast (looks invisible);
-  // mint-700 keeps the brand green while staying legible on light surfaces.
-  ghost: { bg: 'transparent', fg: palette.mint[700] },
-  outline: { bg: tokens.surfaceCard, fg: tokens.textPrimary, border: tokens.borderSubtle },
+// White text only on cobalt and bubblegum-600; sunny always takes ink.
+const VARIANTS: Record<ButtonVariant, { bg: string; fg: string; toy: boolean }> = {
+  primary: { bg: tokens.brandPrimary, fg: tokens.textOnBrand, toy: true },
+  secondary: { bg: tokens.brandSecondary, fg: tokens.textOnBrand, toy: true },
+  reward: { bg: palette.sunny[500], fg: tokens.textPrimary, toy: true },
+  soft: { bg: tokens.surfaceMint, fg: palette.cobalt[700], toy: true },
+  outline: { bg: tokens.surfaceCard, fg: tokens.textPrimary, toy: true },
+  ghost: { bg: 'transparent', fg: palette.cobalt[700], toy: false },
 };
 
 export function Button({
@@ -71,16 +72,17 @@ export function Button({
           columnGap: 10,
           height: s.height,
           paddingHorizontal: s.paddingHorizontal,
-          borderRadius: s.radius,
+          borderRadius: radius.pill,
           width: fullWidth ? '100%' : undefined,
-          alignSelf: fullWidth ? 'stretch' : 'flex-start',
+          alignSelf: fullWidth ? 'stretch' : undefined,
           backgroundColor: v.bg,
-          borderWidth: v.border ? 1.5 : 0,
-          borderColor: v.border,
-          opacity: isDisabled ? 0.5 : pressed ? 0.9 : 1,
-          transform: [{ scale: pressed && !isDisabled ? motion.pressScale : 1 }],
+          opacity: isDisabled ? 0.5 : 1,
+          transform: [
+            { scale: pressed && !isDisabled ? motion.pressScale : 1 },
+            { translateY: pressed && !isDisabled ? 2 : 0 },
+          ],
         },
-        !pressed && !isDisabled && v.shadow,
+        v.toy ? (isDisabled ? outline : hardShadow(pressed ? 3 : 5)) : null,
         style,
       ]}
     >
@@ -90,8 +92,8 @@ export function Button({
         <>
           {icon}
           <Text
-            className="font-subhead"
-            style={{ color: v.fg, fontSize: s.font, lineHeight: s.font * 1.1 }}
+            className="font-display"
+            style={{ color: v.fg, fontSize: s.font, lineHeight: s.font * 1.2 }}
           >
             {label}
           </Text>

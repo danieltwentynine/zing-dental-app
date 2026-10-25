@@ -3,15 +3,16 @@ import type { ComponentType } from 'react';
 import { Text, View, type ViewStyle } from 'react-native';
 
 import type { Badge } from '@/types';
-import { palette, radius, shadows, tokens } from '@/lib/tokens';
+import { hardShadow, outline, palette, radius, tokens } from '@/lib/tokens';
 
 type BadgeType = Badge['type'];
 
-const BADGE_META: Record<BadgeType, { Icon: ComponentType<IconProps>; color: string; label: string }> = {
-  streak: { Icon: Fire, color: palette.sunny[500], label: 'On Fire' },
-  perfect: { Icon: Star, color: palette.mint[500], label: 'Perfect Brush' },
-  firstSession: { Icon: Tooth, color: palette.sky[400], label: 'First Brush' },
-  weeklyGoal: { Icon: Trophy, color: palette.grape[500], label: 'Weekly Star' },
+// Light fills carry an ink icon; only cobalt / bubblegum-600 carry white.
+const BADGE_META: Record<BadgeType, { Icon: ComponentType<IconProps>; color: string; fg: string; label: string }> = {
+  streak: { Icon: Fire, color: palette.sunny[500], fg: tokens.textPrimary, label: 'On Fire' },
+  perfect: { Icon: Star, color: palette.cobalt[500], fg: tokens.textOnBrand, label: 'Perfect Brush' },
+  firstSession: { Icon: Tooth, color: palette.sky[400], fg: tokens.textPrimary, label: 'First Brush' },
+  weeklyGoal: { Icon: Trophy, color: palette.bubblegum[600], fg: tokens.textOnBrand, label: 'Weekly Star' },
 };
 
 interface BadgeCardProps {
@@ -22,7 +23,7 @@ interface BadgeCardProps {
   style?: ViewStyle;
 }
 
-/** BadgeCard — a kid's achievement reward. Earned = full color + glow; locked = greyed. */
+/** BadgeCard — a kid's achievement reward. Earned = full color + toy outline; locked = dashed + greyed. */
 export function BadgeCard({ type = 'firstSession', name, earned = true, caption = '', style }: BadgeCardProps) {
   const meta = BADGE_META[type];
   return (
@@ -36,12 +37,9 @@ export function BadgeCard({ type = 'firstSession', name, earned = true, caption 
           paddingHorizontal: 12,
           borderRadius: radius.xl,
           backgroundColor: tokens.surfaceCard,
-          borderWidth: earned ? 0 : 1.5,
-          borderColor: earned ? undefined : tokens.borderStrong,
-          borderStyle: earned ? undefined : 'dashed',
           opacity: earned ? 1 : 0.6,
         },
-        earned ? shadows.card : null,
+        earned ? hardShadow(6) : { borderWidth: 3, borderColor: palette.ink[300], borderStyle: 'dashed' },
         style,
       ]}
     >
@@ -55,21 +53,21 @@ export function BadgeCard({ type = 'firstSession', name, earned = true, caption 
             justifyContent: 'center',
             backgroundColor: earned ? meta.color : palette.ink[100],
           },
-          earned ? shadows.sm : null,
+          earned ? outline : null,
         ]}
       >
         {earned ? (
-          <meta.Icon size={34} color="#fff" weight="fill" />
+          <meta.Icon size={34} color={meta.fg} weight="fill" />
         ) : (
           <LockSimple size={34} color={palette.ink[400]} weight="bold" />
         )}
       </View>
       <View style={{ alignItems: 'center', rowGap: 2 }}>
-        <Text className="font-subhead" style={{ fontSize: 14, color: tokens.textPrimary, textAlign: 'center' }}>
+        <Text className="font-display-semi" style={{ fontSize: 15, color: tokens.textPrimary, textAlign: 'center' }}>
           {name ?? meta.label}
         </Text>
         {caption ? (
-          <Text className="font-body" style={{ fontSize: 12, color: tokens.textSecondary }}>
+          <Text className="font-body" style={{ fontSize: 13, color: tokens.textSecondary }}>
             {caption}
           </Text>
         ) : null}

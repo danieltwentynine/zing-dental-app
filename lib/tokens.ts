@@ -1,24 +1,23 @@
 /**
- * Zing design tokens — raw values mirroring the design system's CSS tokens
- * (tokens/colors.css, tokens/effects.css). Use these where NativeWind classes
- * can't reach: SVG fills, native shadow objects, gradient stops, animations.
+ * Zing design tokens — "Toy box". Values come from the design-system code export
+ * (zing-design-system/src/theme/tokens.ts); tailwind.preset.js carries the same
+ * values as NativeWind classes. Use these where classes can't reach: SVG fills,
+ * shadows, inline styles.
  *
- * For layout/typography prefer the Tailwind classes (see tailwind.config.js).
+ * Signature: 3px ink outline + hard drop shadow, no blur, no gradients.
  */
-import type { ViewStyle } from 'react-native';
-
 export const palette = {
-  mint: {
-    50: '#e6faf6',
-    100: '#c2f3e9',
-    200: '#8fe9d8',
-    300: '#54dcc2',
-    400: '#1fceac',
-    500: '#00c9a7',
-    600: '#00a98c',
-    700: '#00876f',
-    800: '#096b59',
-    900: '#0c574a',
+  cobalt: {
+    50: '#eef2ff',
+    100: '#d9e2ff',
+    200: '#b5c6ff',
+    300: '#87a2ff',
+    400: '#5b7eff',
+    500: '#2d5bff',
+    600: '#1f45db',
+    700: '#1835ad',
+    800: '#142a85',
+    900: '#121f5e',
   },
   sky: {
     50: '#eaf7fe',
@@ -33,59 +32,58 @@ export const palette = {
     900: '#164e6f',
   },
   ink: {
-    900: '#0f2027',
-    700: '#334155',
-    600: '#475569',
-    500: '#64748b',
-    400: '#94a3b8',
-    300: '#cbd5e1',
-    200: '#e2e8f0',
-    100: '#f1f5f9',
-    50: '#f8fafc',
+    900: '#14142b',
+    700: '#33335a',
+    600: '#44446b',
+    500: '#55557a',
+    400: '#696989',
+    300: '#c4c4d6',
+    200: '#e1e1eb',
+    100: '#f0f0f6',
+    50: '#f8f8fb',
   },
   white: '#ffffff',
-  // The 700s exist because no 500 in these four ramps clears 3:1 against white
-  // (they top out at 2.77:1), so none can carry a white icon — see Avatar.tsx.
-  sunny: { 100: '#fff3cf', 500: '#ffcb3d', 700: '#a8850f' },
-  coral: { 100: '#ffe1e5', 500: '#ff7a8a', 700: '#d13a55' },
-  grape: { 100: '#ebe7ff', 500: '#9b8cff', 700: '#6d4fd6' },
-  warning: { 100: '#fff1dc', 500: '#ffb347', 700: '#c0560c' },
+  sunny: { 100: '#fff3c4', 500: '#ffd23f', 600: '#f2be14' },
+  bubblegum: { 100: '#ffe0ef', 500: '#ff6fb5', 600: '#d6247a' },
+  coral: { 100: '#ffe1e5', 500: '#ff7a8a' },
+  grape: { 100: '#ebe7ff', 500: '#9b8cff' },
+  warning: { 100: '#fff1dc', 500: '#ffb347' },
   danger: { 100: '#fde8e8', 500: '#dc2626' },
 } as const;
 
 /** Semantic aliases — author UIs against these, not the raw ramps. */
 export const tokens = {
-  textPrimary: palette.ink[900],
-  textSecondary: palette.ink[500],
-  textTertiary: palette.ink[400],
-  textOnBrand: palette.white,
-  textLink: palette.mint[600],
+  textPrimary: '#14142b',
+  textSecondary: '#55557a',
+  textTertiary: '#696989',
+  textOnBrand: '#ffffff',
+  textLink: '#1f45db',
 
-  surfacePage: '#f8fffe',
-  surfaceCard: palette.white,
-  surfaceSunken: palette.ink[50],
-  surfaceMint: '#effdf9',
-  surfaceSky: '#eef9fe',
+  surfacePage: '#fff6da',
+  surfaceCard: '#ffffff',
+  surfaceSunken: '#f8f8fb',
+  surfaceMint: '#eef2ff',
+  surfaceSky: '#fff3c4',
 
-  brandPrimary: palette.mint[500],
-  brandPrimaryPress: palette.mint[600],
-  brandSecondary: palette.sky[400],
-  brandSecondaryPress: palette.sky[500],
+  brandPrimary: '#2d5bff',
+  brandPrimaryPress: '#1f45db',
+  brandSecondary: '#d6247a',
+  brandSecondaryPress: '#ff6fb5',
 
-  borderSubtle: palette.ink[200],
-  borderStrong: palette.ink[300],
-  borderFocus: palette.mint[500],
+  borderSubtle: '#14142b',
+  borderStrong: '#14142b',
+  borderFocus: '#2d5bff',
 
-  feedbackWarning: palette.warning[500],
-  feedbackDanger: palette.danger[500],
-  feedbackSuccess: palette.mint[500],
-  feedbackReward: palette.sunny[500],
+  feedbackWarning: '#ffb347',
+  feedbackDanger: '#dc2626',
+  feedbackSuccess: '#2d5bff',
+  feedbackReward: '#ffd23f',
 
   // Mouth-map zone states
-  zoneEmpty: palette.ink[200],
-  zoneActive: palette.mint[300],
-  zoneDone: palette.mint[500],
-  zoneMissed: palette.warning[500],
+  zoneEmpty: '#e1e1eb',
+  zoneActive: '#87a2ff',
+  zoneDone: '#2d5bff',
+  zoneMissed: '#ffb347',
 } as const;
 
 export const radius = {
@@ -94,53 +92,29 @@ export const radius = {
   lg: 16,
   xl: 24,
   '2xl': 32,
-  pill: 999,
+  pill: 9999,
 } as const;
 
-/**
- * Native shadows — soft, low, brand-tinted, never pure black.
- * RN composes iOS shadow* props + Android elevation.
- */
-export const shadows = {
-  sm: {
-    shadowColor: palette.ink[900],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  card: {
-    shadowColor: palette.ink[900],
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 22,
-    elevation: 6,
-  },
-  mint: {
-    shadowColor: palette.mint[500],
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.45,
-    shadowRadius: 18,
-    elevation: 8,
-  },
-  sky: {
-    shadowColor: palette.sky[400],
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.45,
-    shadowRadius: 18,
-    elevation: 8,
-  },
-  sunny: {
-    shadowColor: palette.sunny[500],
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-    elevation: 7,
-  },
-} satisfies Record<string, ViewStyle>;
+/** Static weights: pick the family, never fontWeight. Loaded in app/_layout.tsx. */
+export const font = {
+  display: 'Fredoka-Bold',
+  displaySemi: 'Fredoka-SemiBold',
+  displayMedium: 'Fredoka-Medium',
+  body: 'Lexend-Regular',
+  bodySemi: 'Lexend-SemiBold',
+  numeric: 'Fredoka-Bold',
+} as const;
 
-/** Springy, friendly motion. */
+/** 3px ink outline — every card, button, tile and sticker. */
+export const outline = { borderWidth: 3, borderColor: tokens.borderStrong } as const;
+
+/** Outline + hard ink drop (RN `boxShadow`, New Architecture). Smaller drop = pressed. */
+export const hardShadow = (drop: 3 | 5 | 6 | 8 = 6) => ({
+  ...outline,
+  boxShadow: `0 ${drop}px 0 ${tokens.textPrimary}`,
+});
+
+/** Press feedback: scale to 0.96 and the drop shrinks, like pushing a toy button. */
 export const motion = {
   pressScale: 0.96,
 } as const;
-

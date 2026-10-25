@@ -12,8 +12,8 @@ interface BrushTimerProps {
 }
 
 /**
- * BrushTimer — the 2-minute brushing countdown. A big mint progress ring with
- * Space Grotesk numerals in the center. Purely presentational: pass the
+ * BrushTimer — the 2-minute brushing countdown. A cobalt progress ring around a
+ * white, ink-outlined dial with Fredoka numerals, readable on any background. Purely presentational: pass the
  * remaining seconds; drive it from the session state machine.
  */
 export function BrushTimer({ remaining = 120, total = 120, label = '', size = 240, style }: BrushTimerProps) {
@@ -27,7 +27,8 @@ export function BrushTimer({ remaining = 120, total = 120, label = '', size = 24
   return (
     <View style={[{ width: size, height: size }, style]}>
       <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
-        <Circle cx={half} cy={half} r={r} fill="none" stroke={palette.ink[100]} strokeWidth={14} />
+        <Circle cx={half} cy={half} r={r + 8.5} fill={tokens.surfaceCard} stroke={tokens.textPrimary} strokeWidth={3} />
+        <Circle cx={half} cy={half} r={r} fill="none" stroke={palette.ink[200]} strokeWidth={14} />
         <Circle
           cx={half}
           cy={half}
@@ -48,7 +49,7 @@ export function BrushTimer({ remaining = 120, total = 120, label = '', size = 24
           {mm}:{ss}
         </Text>
         {label ? (
-          <Text className="font-bodySemibold" style={{ fontSize: 14, color: tokens.textSecondary }}>
+          <Text className="font-body-semi" style={{ fontSize: 14, color: tokens.textSecondary }}>
             {label}
           </Text>
         ) : null}

@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Pressable, View, type ViewStyle } from 'react-native';
 
-import { radius, shadows, tokens } from '@/lib/tokens';
+import { hardShadow, outline, palette, radius, tokens } from '@/lib/tokens';
 
-type CardTone = 'plain' | 'mint' | 'sky' | 'sunken' | 'outline';
+type CardTone = 'plain' | 'soft' | 'sky' | 'sunken' | 'outline' | 'cobalt' | 'sunny' | 'bubblegum';
 
 interface CardProps {
   children: ReactNode;
@@ -12,20 +12,24 @@ interface CardProps {
   radius?: number;
   interactive?: boolean;
   onPress?: () => void;
+  accessibilityLabel?: string;
   style?: ViewStyle;
 }
 
-const TONES: Record<CardTone, { bg: string; border?: string }> = {
-  plain: { bg: tokens.surfaceCard },
-  mint: { bg: tokens.surfaceMint },
-  sky: { bg: tokens.surfaceSky },
-  sunken: { bg: tokens.surfaceSunken },
-  outline: { bg: tokens.surfaceCard, border: tokens.borderSubtle },
+const TONES: Record<CardTone, string> = {
+  plain: tokens.surfaceCard,
+  soft: tokens.surfaceMint,
+  sky: tokens.surfaceSky,
+  sunken: tokens.surfaceSunken,
+  outline: tokens.surfaceCard,
+  cobalt: tokens.brandPrimary,
+  sunny: palette.sunny[500],
+  bubblegum: palette.bubblegum[500],
 };
 
 /**
- * Card — white, pillowy, soft brand-tinted shadow, no hard border.
- * The workhorse container for everything: profiles, sessions, stats.
+ * Card — the Toy box surface: 3px ink outline + hard 6px drop (sunken: outline
+ * only). The workhorse container for everything: profiles, sessions, stats.
  */
 export function Card({
   children,
@@ -34,26 +38,27 @@ export function Card({
   radius: radiusProp = radius.xl,
   interactive = false,
   onPress,
+  accessibilityLabel,
   style,
 }: CardProps) {
-  const t = TONES[tone];
-  const base: ViewStyle = {
-    borderRadius: radiusProp,
-    padding,
-    backgroundColor: t.bg,
-    borderWidth: t.border ? 1.5 : 0,
-    borderColor: t.border,
-  };
-  const elevation = tone === 'sunken' ? undefined : shadows.card;
+  // Pressed state lives in React state because NativeWind's runtime drops
+  // Pressable's function-form style prop (nativewind/nativewind#1105).
+  const [pressed, setPressed] = useState(false);
+  const base: ViewStyle = { borderRadius: radiusProp, padding, backgroundColor: TONES[tone] };
+  const flat = tone === 'sunken';
 
   if (interactive || onPress) {
     return (
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
         onPress={onPress}
-        style={({ pressed }) => [
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
+        style={[
           base,
-          elevation,
-          { transform: [{ scale: pressed ? 0.985 : 1 }] },
+          flat ? outline : hardShadow(pressed ? 3 : 6),
+          { transform: [{ scale: pressed ? 0.98 : 1 }, { translateY: pressed ? 3 : 0 }] },
           style,
         ]}
       >
@@ -62,5 +67,5 @@ export function Card({
     );
   }
 
-  return <View style={[base, elevation, style]}>{children}</View>;
+  return <View style={[base, flat ? outline : hardShadow(6), style]}>{children}</View>;
 }

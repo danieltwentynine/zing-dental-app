@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Pressable, Text, type ViewStyle } from 'react-native';
 
-import { motion, radius, shadows, tokens } from '@/lib/tokens';
+import { hardShadow, motion, radius, tokens } from '@/lib/tokens';
 
 interface ChipProps {
   label: string;
@@ -14,7 +14,7 @@ interface ChipProps {
 
 /**
  * Chip — a selectable pill (e.g. choosing a child's age).
- * Big tap target (min 44px), mint-fill when selected.
+ * Big tap target (min 48px), cobalt-fill when selected.
  */
 export function Chip({
   label,
@@ -43,22 +43,20 @@ export function Chip({
           alignItems: 'center',
           justifyContent: 'center',
           columnGap: 8,
-          minHeight: 44,
+          minHeight: 48,
           paddingHorizontal: 18,
           borderRadius: radius.pill,
           backgroundColor: selected ? tokens.brandPrimary : tokens.surfaceCard,
-          borderWidth: 1.5,
-          borderColor: selected ? tokens.brandPrimary : tokens.borderSubtle,
-          transform: [{ scale: pressed ? motion.pressScale : 1 }],
+          transform: [{ scale: pressed ? motion.pressScale : 1 }, { translateY: pressed ? 2 : 0 }],
         },
-        selected && shadows.mint,
+        hardShadow(pressed ? 3 : 5),
         style,
       ]}
     >
       {icon}
       <Text
-        className="font-bodySemibold"
-        style={{ color: selected ? tokens.textOnBrand : tokens.textPrimary, fontSize: 15, fontWeight: '700' }}
+        className="font-display"
+        style={{ color: selected ? tokens.textOnBrand : tokens.textPrimary, fontSize: 18 }}
       >
         {label}
       </Text>

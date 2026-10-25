@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg';
 
 import type { ToothZone } from '@/types';
-import { tokens } from '@/lib/tokens';
+import { font, tokens } from '@/lib/tokens';
 
 export type ZoneState = 'empty' | 'active' | 'done' | 'missed';
 
@@ -43,8 +43,8 @@ interface MouthMapProps {
 /**
  * MouthMap — the signature Zing component. A stylized dental arch of 10 zones
  * that fill as the child brushes (CLAUDE.md > MouthMap.tsx).
- * empty (grey) → active (light mint) → done (solid mint + ✓). Un-brushed zones
- * end as missed (warm orange + !) — never red.
+ * empty (grey) → active (light cobalt) → done (solid cobalt + ✓). Un-brushed
+ * zones end as missed (warm orange + ink !) — never red. Ink outlines (Toy box).
  */
 export function MouthMap({ states = {}, size = 220 }: MouthMapProps) {
   const cx = 110, cy = 110, ro = 96, ri = 50;
@@ -68,22 +68,23 @@ export function MouthMap({ states = {}, size = 220 }: MouthMapProps) {
 
   return (
     <Svg width={size} height={size} viewBox="0 0 220 220">
-      <Circle cx={cx} cy={cy} r={ri - 8} fill={tokens.surfaceMint} />
+      <Circle cx={cx} cy={cy} r={ri - 8} fill={tokens.surfaceMint} stroke={tokens.textPrimary} strokeWidth={3} />
       {segments.map(({ z, a0, a1, st, lx, ly }) => (
         <Fragment key={z}>
           <Path
             d={sectorPath(cx, cy, ri, ro, a0, a1)}
             fill={STATE_FILL[st]}
-            stroke={tokens.surfaceCard}
-            strokeWidth={2.5}
+            stroke={tokens.textPrimary}
+            strokeWidth={3}
+            strokeLinejoin="round"
           />
           {st === 'done' ? (
-            <SvgText x={lx} y={ly + 4} textAnchor="middle" fontSize={13} fontWeight="900" fill="#fff">
+            <SvgText x={lx} y={ly + 5} textAnchor="middle" fontSize={14} fontFamily={font.display} fill={tokens.textOnBrand}>
               ✓
             </SvgText>
           ) : null}
           {st === 'missed' ? (
-            <SvgText x={lx} y={ly + 4} textAnchor="middle" fontSize={14} fontWeight="900" fill="#fff">
+            <SvgText x={lx} y={ly + 5} textAnchor="middle" fontSize={15} fontFamily={font.display} fill={tokens.textPrimary}>
               !
             </SvgText>
           ) : null}

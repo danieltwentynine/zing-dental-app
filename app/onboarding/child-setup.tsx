@@ -8,7 +8,7 @@ import { Chip } from '@/components/ui/Chip';
 import { Input } from '@/components/ui/Input';
 import { SafeScreen } from '@/components/ui/SafeScreen';
 import { createChild } from '@/lib/children';
-import { tokens } from '@/lib/tokens';
+import { outline, tokens } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
 import { useChildStore } from '@/stores/childStore';
 
@@ -59,12 +59,13 @@ export default function ChildSetupScreen() {
               alignSelf: 'flex-start',
               backgroundColor: tokens.surfaceMint,
               borderRadius: 999,
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              marginBottom: 6,
+              paddingHorizontal: 12,
+              paddingVertical: 3,
+              marginBottom: 10,
+              ...outline,
             }}
           >
-            <Text className="font-numeric" style={{ fontSize: 12, color: tokens.brandPrimary }}>
+            <Text className="font-numeric" style={{ fontSize: 14, color: tokens.textLink }}>
               STEP 2 OF 2
             </Text>
           </View>
@@ -78,7 +79,7 @@ export default function ChildSetupScreen() {
             <Input label="Child's name" placeholder="e.g. Leo" value={name} onChangeText={setName} />
 
             <View>
-              <Text className="mb-2 font-bodySemibold text-sm text-ink">How old is your child?</Text>
+              <Text className="mb-2 font-body-semi text-sm text-ink">How old is your child?</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 {AGES.map((a) => (
                   <Chip
@@ -94,12 +95,12 @@ export default function ChildSetupScreen() {
             </View>
 
             <View>
-              <Text className="mb-2.5 font-bodySemibold text-sm text-ink">Pick a character</Text>
+              <Text className="mb-2.5 font-body-semi text-sm text-ink">Pick a character</Text>
               <AvatarPicker value={avatar} onChange={setAvatar} />
             </View>
           </View>
 
-          {error ? <Text className="mt-4 font-bodySemibold text-sm text-danger">{error}</Text> : null}
+          {error ? <Text className="mt-4 font-body-semi text-sm text-danger">{error}</Text> : null}
 
           <Button
             label="Start brushing adventure"

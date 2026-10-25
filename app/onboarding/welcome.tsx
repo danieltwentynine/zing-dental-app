@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
@@ -14,7 +13,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
-import { ZingMascot, ZingWordmark } from '@/components/brand/ZingBrand';
+import { SparkyWave, ZingLockup } from '@/components/brand/ZingBrand';
 import { Button } from '@/components/ui/Button';
 import { signInWithGoogle } from '@/lib/socialAuth';
 import { tokens } from '@/lib/tokens';
@@ -64,7 +63,7 @@ function FloatingMascot({ width }: { width: number }) {
 
   return (
     <Animated.View style={floatStyle}>
-      <ZingMascot width={width} />
+      <SparkyWave width={width} />
     </Animated.View>
   );
 }
@@ -91,17 +90,15 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={[tokens.surfaceMint, tokens.surfacePage]}
-      locations={[0, 0.7]}
-      style={{ flex: 1 }}
-    >
+    <View style={{ flex: 1, backgroundColor: tokens.surfacePage }}>
       <SafeAreaView style={{ flex: 1, paddingHorizontal: 28, paddingBottom: 32 }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', rowGap: 6 }}>
-          <FloatingMascot width={168} />
-          <ZingWordmark height={56} />
+          <FloatingMascot width={200} />
+          <View style={{ marginTop: 12 }}>
+            <ZingLockup height={56} />
+          </View>
           <Text
-            className="font-bodySemibold"
+            className="font-body"
             style={{
               fontSize: 18,
               lineHeight: 26,
@@ -117,7 +114,7 @@ export default function WelcomeScreen() {
         <View style={{ rowGap: 12, marginTop: 24 }}>
           {signInError ? (
             <Text
-              className="font-bodySemibold text-sm text-danger"
+              className="font-body-semi text-sm text-danger"
               style={{ textAlign: 'center' }}
             >
               {signInError}
@@ -138,6 +135,6 @@ export default function WelcomeScreen() {
           />
         </View>
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 }

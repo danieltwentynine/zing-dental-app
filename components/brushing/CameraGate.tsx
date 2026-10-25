@@ -2,6 +2,7 @@ import { Camera as CameraIcon } from 'phosphor-react-native';
 import { Text, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
+import { tokens } from '@/lib/tokens';
 
 interface CameraGateProps {
   onAllow: () => void;
@@ -15,8 +16,8 @@ interface CameraGateProps {
 export function CameraGate({ onAllow, onSkip }: CameraGateProps) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28, rowGap: 14 }}>
-      <CameraIcon size={56} color="#54dcc2" weight="fill" />
-      <Text className="font-display" style={{ fontSize: 26, color: '#fff', textAlign: 'center' }}>
+      <CameraIcon size={56} color={tokens.feedbackReward} weight="fill" />
+      <Text className="font-display" style={{ fontSize: 28, color: tokens.textOnBrand, textAlign: 'center' }}>
         Let Zing watch the brushing
       </Text>
       <Text className="font-body" style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
@@ -25,7 +26,7 @@ export function CameraGate({ onAllow, onSkip }: CameraGateProps) {
       </Text>
       <View style={{ rowGap: 10, alignSelf: 'stretch', marginTop: 10 }}>
         <Button label="Turn on camera" onPress={onAllow} fullWidth />
-        <Button label="Brush without camera" onPress={onSkip} variant="ghost" fullWidth />
+        <Button label="Brush without camera" onPress={onSkip} variant="outline" fullWidth />
       </View>
     </View>
   );

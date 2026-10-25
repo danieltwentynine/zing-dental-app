@@ -11,9 +11,17 @@
   ],
   "componentSrcMap": {
     "AvatarPicker": "../../../components/kids/Avatar.tsx",
-    "ZingMascot": "../../../components/brand/ZingBrand.tsx",
     "ZingWordmark": "../../../components/brand/ZingBrand.tsx",
-    "SafeAreaProvider": null
+    "SafeAreaProvider": null,
+    "ZingMark": "../../../components/brand/ZingBrand.tsx",
+    "ZingMarkMono": "../../../components/brand/ZingBrand.tsx",
+    "ZingWordmarkSunny": "../../../components/brand/ZingBrand.tsx",
+    "ZingLockup": "../../../components/brand/ZingBrand.tsx",
+    "Sparky": "../../../components/brand/ZingBrand.tsx",
+    "SparkyBrushing": "../../../components/brand/ZingBrand.tsx",
+    "SparkyCheer": "../../../components/brand/ZingBrand.tsx",
+    "SparkyWave": "../../../components/brand/ZingBrand.tsx",
+    "Sticker": "../../../components/kids/Sticker.tsx"
   },
   "provider": {
     "component": "SafeAreaProvider"
